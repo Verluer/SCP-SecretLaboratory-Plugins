@@ -4,6 +4,7 @@ using InventorySystem.Items.Usables.Scp330;
 using LabApi.Features.Wrappers;
 using MEC;
 using PlayerRoles;
+using PlayerRoles.FirstPersonControl;
 using PlayerStatsSystem;
 using Respawning.Objectives;
 using System.Collections.Generic;
@@ -29,9 +30,18 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
             List<ReferenceHub> SCPlist = new List<ReferenceHub>();
             foreach (ReferenceHub SCPhub in ReferenceHub.AllHubs)
             {
-                if (SCPhub.roleManager.CurrentRole.Team == Team.SCPs)
+                if (SCPhub.roleManager.CurrentRole.Team == Team.SCPs && SCPhub.roleManager.CurrentRole.RoleTypeId != RoleTypeId.Scp0492)
                 {
                     SCPlist.Add(SCPhub);
+                    var role = SCPhub.roleManager.CurrentRole;
+
+                    LabApi.Features.Console.Logger.Info(
+                        $"[{SCPhub.nicknameSync.MyNick}] " +
+                        $"Type={role.GetType().FullName}, " +
+                        $"RoleId={role.RoleTypeId}, " +
+                        $"Team={role.Team}, " +
+                        $"Fpc={role is FpcStandardRoleBase}"
+                    );
                 }
             }
             if (SCPlist.Count == 0)
@@ -49,9 +59,9 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
                 RoleTypeId SCPRole = SCPlist[roll].GetRoleId();
 
                 hub.roleManager.ServerSetRole(SCPRole, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.None);
-                SCPlist[roll].roleManager.ServerSetRole(HumanRole, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.None);
+                SCPlist[roll].roleManager.ServerSetRole(HumanRole, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.AssignInventory);
 
-                Timing.CallDelayed(15f, () =>
+                Timing.CallDelayed(10f, () =>
                 {
                     Player.Get(hub).SendHint(
                         $"Вы заменили <color=red>{SCPRole}</color> <color=green>{SCPlist[roll].GetNickname()}</color>, поздравляем вас!",

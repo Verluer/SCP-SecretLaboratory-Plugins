@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using VoiceChat.Networking;
 
 
 namespace AllOfPlugins_SCP_Verluer.GamePatch
@@ -7,11 +8,13 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
     {
         public static void Enable(Harmony harmony)
         {
-
+            GiveSpawnItem.Enable();
+            ScpProximityVoice.Enable();
         }
         public static void Disable()
         {
-
+            GiveSpawnItem.Disable();
+            ScpProximityVoice.Disable();
         }
     }
 }

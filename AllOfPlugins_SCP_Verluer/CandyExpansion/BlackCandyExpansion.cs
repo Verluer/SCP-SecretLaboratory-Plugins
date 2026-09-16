@@ -1,4 +1,5 @@
-﻿using Exiled.API.Features.Roles;
+﻿using CentralAuth;
+using Exiled.API.Features.Roles;
 using HarmonyLib;
 using InventorySystem.Items.Usables.Scp330;
 using LabApi.Events.Arguments.PlayerEvents;
@@ -74,7 +75,7 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
         private static bool ServerApplyEffectsPrefix(ReferenceHub hub)
         {
 
-            int roll = UnityEngine.Random.Range(0, 6);
+            int roll = UnityEngine.Random.Range(0, 7);
             switch (roll)
             {
                 case 0:
@@ -92,11 +93,11 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
                         }
                         health.MaxValue = 2000f;
                         health.CurValue = 1500f;
-                        Timing.CallDelayed(15f, () =>
+                        Timing.CallDelayed(10f, () =>
                         {
                             Player.Get(hub).SendHint(
-                                $"Вы заразились <color=red>чумой. Как нулевой пациент вы распространяете <color=red>Чуму</color> при поедании других существ",
-                                10f
+                                $"Вы заразились <color=red>чумой</color>. Как нулевой пациент вы распространяете <color=red>Чуму</color> при поедании других существ",
+                                15f
                             );
                         });
                     }
@@ -112,11 +113,22 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
 
 
                         health.MaxValue = 750f;
-                        health.CurValue = 759f;
+                        health.CurValue = 750f;
                     }
-                    foreach (ReferenceHub allHub in ReferenceHub.AllHubs)
+                    foreach (ReferenceHub _hub in ReferenceHub.AllHubs)
                     {
-                        Player.Get(allHub).SendHint($"Обнаружен новый <color=red> SCP-объект</color> в комплексе", 5f);
+                        if (_hub == null || _hub.Mode == ClientInstanceMode.DedicatedServer)
+                            continue;
+
+                        Player player = Player.Get(_hub);
+
+                        if (player == null)
+                            continue;
+
+                        player.SendHint(
+                            "Обнаружен новый <color=red>SCP-объект</color> в комплексе",
+                            5f
+                        );
                     }
 
                     return false;
@@ -145,8 +157,21 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
                     Player.Get(hub).SendHint($"Чёрных конфет стало больше!", 5f);
                     return false;
                 case 4:
-                    ExplosionOutcome explosionOutcome = new ExplosionOutcome();
-                    explosionOutcome.ServerGrant(hub);
+                    int rollboom = UnityEngine.Random.Range(0, 100);
+                    if (rollboom < 50)
+                    {
+                        ExplosionOutcome explosionOutcome = new ExplosionOutcome();
+                        explosionOutcome.ServerGrant(hub);
+                    }
+                    else
+                    {
+                        Player.Get(hub).SendHint($"Поздравляем! Вы избежали фееричной смерти! <color=blue>Идёт перерасчёт вероятностей...</color>", 5f);
+                        Timing.CallDelayed(5f, () =>
+                        {
+                            ServerApplyEffectsPrefix(hub);
+                        });
+                        return false;
+                    }
                     return false;
                 case 5:
                     HlEffects[UnityEngine.Random.Range(0, HlEffects.Count)](hub);
@@ -168,7 +193,7 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
         }
         private static IEnumerator<float> UnAllowPunishment(ReferenceHub hub)
         {
-            yield return Timing.WaitForSeconds(15f);
+            yield return Timing.WaitForSeconds(5f);
 
             _punishmentBlockedPlayers.Remove(hub);
             _punishmentCoroutines.Remove(hub);

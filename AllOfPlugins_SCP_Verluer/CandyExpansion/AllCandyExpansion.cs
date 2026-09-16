@@ -68,6 +68,7 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
             {
                 ExplosionOutcome explosionOutcome = new ExplosionOutcome();
                 explosionOutcome.ServerGrant(hub);
+                Player.Get(hub).SendHint($"Вы <color=red>взорвались</color>. Вас убил <color=blue>Ferelur-Morron-Эдвард</color>", 5f);
             }
             return true;
         }

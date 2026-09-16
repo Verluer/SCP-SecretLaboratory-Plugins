@@ -1,16 +1,19 @@
 ﻿using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
+using LabApi.Features.Wrappers;
 using MEC;
 using PlayerRoles;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace AllOfPlugins_SCP_Verluer
+namespace AllOfPlugins_SCP_Verluer.GamePatch
 {
-    public static class GiveItem
+    public class GiveSpawnItem
     {
-        private static readonly HashSet<uint> CoinScheduled =
-    new HashSet<uint>();
+        private static readonly HashSet<uint> CoinScheduled = new HashSet<uint>();
         public static void Enable()
         {
             PlayerEvents.ChangedRole += OnChangedRole;
@@ -26,7 +29,7 @@ namespace AllOfPlugins_SCP_Verluer
         {
             bool giveCoin =
                 ev.NewRole.RoleTypeId == RoleTypeId.ClassD ||
-                ev.NewRole.RoleTypeId == RoleTypeId.Scientist || 
+                ev.NewRole.RoleTypeId == RoleTypeId.Scientist ||
                 ev.NewRole.RoleTypeId == RoleTypeId.FacilityGuard;
 
             if (!giveCoin)

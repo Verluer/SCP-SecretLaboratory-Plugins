@@ -32,7 +32,7 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
             };
         private static readonly CandyKindID[] UltraRareCandies =
         {
-                               CandyKindID.Evil
+             CandyKindID.Evil
         };
 
         public static void Enable(Harmony harmony)

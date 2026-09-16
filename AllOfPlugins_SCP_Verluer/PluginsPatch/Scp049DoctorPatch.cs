@@ -187,8 +187,8 @@ namespace AllOfPlugins_SCP_Verluer
         private static class DoctorOnDeathPatch
         {
             private static bool Prefix(
-                DoctorHandlers __instance,
-                PlayerDeathEventArgs ev)
+    DoctorHandlers __instance,
+    PlayerDeathEventArgs ev)
             {
                 if (ev == null ||
                     ev.Player == null ||
@@ -197,8 +197,7 @@ namespace AllOfPlugins_SCP_Verluer
                     return true;
                 }
 
-                uint zombieId =
-                    ev.Player.NetworkId;
+                uint zombieId = ev.Player.NetworkId;
 
                 LabApi.Features.Console.Logger.Info(
                     $"Scp049Doctor: processing death of zombie {zombieId}."
@@ -224,6 +223,7 @@ namespace AllOfPlugins_SCP_Verluer
                     LabApi.Features.Console.Logger.Error(
                         "Scp049Doctor: internal fields not found."
                     );
+
                     return true;
                 }
 
@@ -244,6 +244,7 @@ namespace AllOfPlugins_SCP_Verluer
 
                     return true;
                 }
+
                 uint ownerDoctorId;
 
                 if (!zombieToDoctor.TryGetValue(
@@ -253,12 +254,9 @@ namespace AllOfPlugins_SCP_Verluer
                     LabApi.Features.Console.Logger.Warn(
                         $"Zombie {zombieId}: owner doctor NOT FOUND."
                     );
+
                     return true;
                 }
-                bool super =
-                    superZombies.Remove(zombieId);
-
-                zombieToDoctor.Remove(zombieId);
 
                 bool lookingAtTarget;
 
@@ -272,15 +270,7 @@ namespace AllOfPlugins_SCP_Verluer
                         "Reward ALLOWED."
                     );
 
-                    ForceReward(
-                        __instance,
-                        ownerDoctorId,
-                        super
-                    );
-
-                    Remove(zombieId);
-
-                    return false;
+                    return true;
                 }
 
                 if (lookingAtTarget)
@@ -291,6 +281,9 @@ namespace AllOfPlugins_SCP_Verluer
                         "REWARD BLOCKED."
                     );
 
+                    superZombies.Remove(zombieId);
+                    zombieToDoctor.Remove(zombieId);
+
                     Remove(zombieId);
 
                     return false;
@@ -299,81 +292,11 @@ namespace AllOfPlugins_SCP_Verluer
                 LabApi.Features.Console.Logger.Warn(
                     $"Zombie {zombieId}: " +
                     "LookingAtTarget = FALSE -> " +
-                    "CALLING REWARD."
+                    "CALLING ORIGINAL REWARD."
                 );
-
-                ForceReward(
-                    __instance,
-                    ownerDoctorId,
-                    super
-                );
-
-                Remove(zombieId);
-
-                return false;
+                return true;
             }
 
-            private static void ForceReward(
-                DoctorHandlers handlers,
-                uint ownerDoctorId,
-                bool super)
-            {
-                if (handlers == null)
-                {
-                    LabApi.Features.Console.Logger.Error(
-                        "Scp049Doctor: DoctorHandlers instance is null."
-                    );
-
-                    return;
-                }
-
-                MethodInfo rewardDoctors =
-                    typeof(DoctorHandlers).GetMethod(
-                        "RewardDoctors",
-                        BindingFlags.Instance |
-                        BindingFlags.NonPublic
-                    );
-
-                if (rewardDoctors == null)
-                {
-                    LabApi.Features.Console.Logger.Error(
-                        "Scp049Doctor: RewardDoctors method NOT FOUND."
-                    );
-
-                    return;
-                }
-
-                try
-                {
-                    LabApi.Features.Console.Logger.Warn(
-                        $"Scp049Doctor: " +
-                        $"!!! CALLING RewardDoctors !!! " +
-                        $"doctor={ownerDoctorId}, super={super}"
-                    );
-
-                    rewardDoctors.Invoke(
-                        handlers,
-                        new object[]
-                        {
-                            ownerDoctorId,
-                            super
-                        }
-                    );
-
-                    LabApi.Features.Console.Logger.Info(
-                        $"Scp049Doctor: RewardDoctors completed " +
-                        $"for doctor {ownerDoctorId}."
-                    );
-                }
-                catch (Exception ex)
-                {
-                    LabApi.Features.Console.Logger.Error(
-                        "Scp049Doctor: " +
-                        "Failed to call RewardDoctors: " +
-                        ex
-                    );
-                }
-            }
         }
 
         #endregion
