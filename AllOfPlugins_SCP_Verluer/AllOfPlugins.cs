@@ -89,7 +89,11 @@ namespace AllOfPlugins_SCP_Verluer
             if (!PlayerSchematicManager.HasSchematic(ev.Player))
                 return;
 
+            // Не создаём стандартный ragdoll.
             ev.IsAllowed = false;
+
+            // Превращаем нашу schematic в "труп".
+            PlayerSchematicManager.DetachAsCorpse(ev.Player);
         }
     }
 }

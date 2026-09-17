@@ -43,7 +43,7 @@ namespace AllOfPlugins_SCP_Verluer.CustomRoleModule
             }
 
             // Должен существовать хотя бы один SCP.
-            if (scps.Count == 0 || scps.Count == 0)
+            if (scps.Count == 0 || scps.Count == 2)
             {
                 LabApi.Features.Console.Logger.Warn(
                     "[HumanSCP] Недостаточно SCP.");
@@ -51,10 +51,11 @@ namespace AllOfPlugins_SCP_Verluer.CustomRoleModule
                 return false;
             }
             int roll = UnityEngine.Random.Range(0, 100);
-            if (roll > 100)
+            if (roll > 15)
             {
                 return false;
             }
+
             List<Player> specialSCP = new List<Player>();
             Player target = null;
 
@@ -81,15 +82,15 @@ namespace AllOfPlugins_SCP_Verluer.CustomRoleModule
 
             PlayerSchematicManager.Attach(
                 target,
-                "Scp999",
+                "SCP-035",
                 new Vector3(0f, 0f, 0f),
-                Vector3.zero, false
+                Vector3.zero, true
             );
 
-            Timing.CallDelayed(1f, () =>
+            Timing.CallDelayed(0.5f, () =>
             {
                 PlayerSchematicManager.EnableFade(target);
-                PlayerSchematicManager.SetScale(target, new Vector3(1.13f, 0.5f, 1.13f));
+                //PlayerSchematicManager.SetScale(target, new Vector3(1.13f, 0.5f, 1.13f)); 
                 
             });
 
@@ -137,7 +138,7 @@ namespace AllOfPlugins_SCP_Verluer.CustomRoleModule
 
             LabApi.Features.Console.Logger.Info(
                 $"[HumanSCP] Роль зарегистрирована. ID = {_role.Id}");
-            if (ActionEvent.isEventActive == false)
+            if (EventModule.EventModule.isZombieEventActive == false)
             {
                 RoleAssigner.OnPlayersSpawned += OnPlayersSpawned;
             }

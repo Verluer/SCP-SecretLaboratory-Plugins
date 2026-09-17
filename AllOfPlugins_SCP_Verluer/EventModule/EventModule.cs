@@ -11,6 +11,7 @@ namespace AllOfPlugins_SCP_Verluer.EventModule
 {
     public class EventModule
     {
+        public static bool isZombieEventActive = false;
         public static void Enable(Harmony harmony)
         {
 
@@ -18,17 +19,22 @@ namespace AllOfPlugins_SCP_Verluer.EventModule
 
             RoleAssigner.OnPlayersSpawned += () =>
             {
-                int roll = UnityEngine.Random.Range(0, 100);
-                if (roll < 15)
+                int rollZombieEvent = UnityEngine.Random.Range(0, 100);
+                if (rollZombieEvent < 15)
                 {
-                    ActionEvent.isEventActive = true;
-                    OnRolesInitialized();
+                    isZombieEventActive = true;
+                    ZombieApocalypse.Enable();
+                }
+                int rollSCP261Event = UnityEngine.Random.Range(0, 100);
+                if (rollSCP261Event < 100)
+                {
+                    Scp261Event.Enable();
                 }
             };
 
             ServerEvents.RoundEnded += (ev) =>
             {
-                ActionEvent.isEventActive = false;
+                isZombieEventActive = false;
             };
 
 
@@ -38,18 +44,17 @@ namespace AllOfPlugins_SCP_Verluer.EventModule
 
         public static void Disable()
         {
-            RoleAssigner.OnPlayersSpawned -= OnRolesInitialized;
-
-            ServerEvents.RoundEnded += (ev) =>
+            RoleAssigner.OnPlayersSpawned -= () =>
             {
-                ActionEvent.isEventActive = false;
+                ZombieApocalypse.Disable();
+            };
+
+                ServerEvents.RoundEnded += (ev) =>
+            {
+                isZombieEventActive = false;
             };
 
         }
-        private static void OnRolesInitialized()
-        {
-            ZombieApocalypse.Enable();
 
-        }
     }
 }

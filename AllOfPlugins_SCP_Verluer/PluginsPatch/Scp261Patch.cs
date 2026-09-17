@@ -106,10 +106,6 @@ namespace AllOfPlugins_SCP_Verluer
                         "Оно будет получаться через reflection при необходимости.");
                 }
 
-                // ---------------------------------------------------------
-                // Harmony Transpiler
-                // ---------------------------------------------------------
-
                 harmony.Patch(
                     interacted,
                     transpiler: new HarmonyMethod(
@@ -345,10 +341,6 @@ namespace AllOfPlugins_SCP_Verluer
             }
         }
 
-        // ================================================================
-        // ВЫЗОВ ОРИГИНАЛЬНОГО GiveRandomItem
-        // ================================================================
-
         private static void InvokeOriginalGiveRandomItem(
             Player player)
         {
@@ -376,10 +368,6 @@ namespace AllOfPlugins_SCP_Verluer
                     $"GiveRandomItem:\n{ex}");
             }
         }
-
-        // ================================================================
-        // ПОЛУЧЕНИЕ CONFIG
-        // ================================================================
 
         private static object GetScp261Config()
         {
@@ -435,10 +423,6 @@ namespace AllOfPlugins_SCP_Verluer
                 return null;
             }
         }
-
-        // ================================================================
-        // ПОЛУЧЕНИЕ ЗНАЧЕНИЙ CONFIG
-        // ================================================================
 
         private static T GetConfigValue<T>(
             object config,

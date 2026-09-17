@@ -33,12 +33,6 @@ namespace AllOfPlugins_SCP_Verluer.EventModule
                 if (hub == null || hub.Mode == ClientInstanceMode.DedicatedServer)
                     continue;
 
-                LabApi.Features.Console.Logger.Info(
-    $"PLAYER: {hub.nicknameSync.MyNick} | " +
-    $"Role: {hub.roleManager.CurrentRole.RoleTypeId} | " +
-    $"Team: {hub.roleManager.CurrentRole.Team}"
-);
-
                 if (hub.roleManager.CurrentRole.Team == Team.SCPs)
                 {
                     hub.roleManager.ServerSetRole(RoleTypeId.ClassD, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.UseSpawnpoint);

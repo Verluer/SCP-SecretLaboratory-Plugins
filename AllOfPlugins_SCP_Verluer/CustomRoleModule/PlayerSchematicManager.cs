@@ -1,26 +1,32 @@
 ﻿using AdminToys;
 using CustomPlayerEffects;
 using LabApi.Features.Wrappers;
+using MEC;
+using Mirror;
 using ProjectMER.Features;
 using ProjectMER.Features.Objects;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using MEC;
 
 namespace AllOfPlugins_SCP_Verluer.GamePatch
 {
     public static class PlayerSchematicManager
     {
         private static readonly Dictionary<Player, SchematicObject> SpawnedSchematics = new();
+
         private static readonly Dictionary<Player, CoroutineHandle> FollowCoroutines = new();
 
+        private static readonly Dictionary<Player, CoroutineHandle> ParentDeathCoroutines = new();
+
+        private static readonly List<SchematicObject> CorpseSchematics = new();
+
         public static bool Attach(
-    Player player,
-    string schematicName,
-    Vector3 positionOffset = default,
-    Vector3 rotationOffset = default,
-    bool useParent = false)
+            Player player,
+            string schematicName,
+            Vector3 positionOffset = default,
+            Vector3 rotationOffset = default,
+            bool useParent = false)
         {
             if (player == null)
                 return false;
@@ -75,6 +81,7 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                     return false;
                 }
 
+                // Максимально частая синхронизация AdminToy.
                 foreach (AdminToyBase adminToyBase in schematic.AdminToyBases)
                 {
                     adminToyBase.syncInterval = 0f;
@@ -84,35 +91,21 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
 
                 if (useParent)
                 {
-                    // Обычный Parent.
-                    // Position, Rotation и Scale наследуются от игрока.
                     schematic.transform.SetParent(
                         playerTransform,
                         true
                     );
+
                 }
                 else
                 {
-                    // Настоящий Parent для максимально плавного
-                    // Position / Rotation.
-                    //
-                    // Scale игрока при этом будет компенсироваться.
-                    schematic.transform.SetParent(
-                        playerTransform,
-                        true
-                    );
-
-                    // Запоминаем мировой размер schematic
-                    // ДО того, как Scale игрока будет изменён.
-                    Vector3 originalWorldScale =
-                        schematic.transform.lossyScale;
-
                     CoroutineHandle coroutine =
                         Timing.RunCoroutine(
-                            FollowParentWithoutScale(
+                            FollowPlayer(
                                 player,
                                 schematic,
-                                originalWorldScale
+                                positionOffset,
+                                rotationOffsetQuaternion
                             )
                         );
 
@@ -139,10 +132,68 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
             }
         }
 
-        private static IEnumerator<float> FollowParentWithoutScale(
+        /// <summary>
+        /// Превращает schematic игрока в самостоятельный объект трупа.
+        ///
+        /// Вызывается в момент SpawningRagdoll.
+        /// После этого schematic больше не связан с Player
+        /// и не будет уничтожен через Remove(player).
+        /// </summary>
+        public static void DetachAsCorpse(Player player)
+        {
+            if (player == null)
+                return;
+
+            try
+            {
+                if (!SpawnedSchematics.TryGetValue(
+                        player,
+                        out SchematicObject schematic) ||
+                    schematic == null)
+                {
+                    return;
+                }
+                StopFollowing(player);
+
+                if (ParentDeathCoroutines.TryGetValue(
+                        player,
+                        out CoroutineHandle deathCoroutine))
+                {
+                    Timing.KillCoroutines(deathCoroutine);
+                    ParentDeathCoroutines.Remove(player);
+                }
+
+                schematic.transform.SetParent(null, true);
+
+                SpawnedSchematics.Remove(player);
+
+                if (!CorpseSchematics.Contains(schematic))
+                {
+                    CorpseSchematics.Add(schematic);
+                }
+
+                ResetScale(player);
+
+                LabApi.Features.Console.Logger.Info(
+                    $"[PlayerSchematicManager] " +
+                    $"Schematic игрока {player.Nickname} " +
+                    $"отсоединён и оставлен как corpse."
+                );
+            }
+            catch (Exception ex)
+            {
+                LabApi.Features.Console.Logger.Error(
+                    $"[PlayerSchematicManager] " +
+                    $"Ошибка DetachAsCorpse для {player.Nickname}:\n{ex}"
+                );
+            }
+        }
+
+        private static IEnumerator<float> FollowPlayer(
             Player player,
             SchematicObject schematic,
-            Vector3 originalWorldScale)
+            Vector3 positionOffset,
+            Quaternion rotationOffset)
         {
             while (player != null &&
                    schematic != null &&
@@ -151,6 +202,7 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                 if (!player.IsAlive)
                 {
                     ResetScale(player);
+
                     FollowCoroutines.Remove(player);
 
                     yield break;
@@ -161,27 +213,17 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
 
                 if (playerTransform != null)
                 {
-                    Vector3 parentScale =
-                        playerTransform.lossyScale;
-
-                    Transform schematicTransform =
-                        schematic.transform;
-
-                    schematicTransform.localScale =
-                        new Vector3(
-                            SafeDivide(
-                                originalWorldScale.x,
-                                parentScale.x
-                            ),
-                            SafeDivide(
-                                originalWorldScale.y,
-                                parentScale.y
-                            ),
-                            SafeDivide(
-                                originalWorldScale.z,
-                                parentScale.z
-                            )
+                    Vector3 worldOffset =
+                        playerTransform.TransformDirection(
+                            positionOffset
                         );
+
+                    schematic.Position =
+                        player.Position + worldOffset;
+
+                    schematic.Rotation =
+                        playerTransform.rotation *
+                        rotationOffset;
                 }
 
                 yield return Timing.WaitForOneFrame;
@@ -191,15 +233,6 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                 FollowCoroutines.Remove(player);
         }
 
-        private static float SafeDivide(
-            float value,
-            float divisor)
-        {
-            if (Mathf.Abs(divisor) < 0.0001f)
-                return 0f;
-
-            return value / divisor;
-        }
         public static void EnableFade(Player player)
         {
             if (player == null)
@@ -221,8 +254,7 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
         }
 
         /// <summary>
-        /// Полностью удаляет schematic и сбрасывает состояние игрока.
-        /// Используется при смене роли, повторном Attach или очистке.
+        /// Полностью удаляет schematic игрока.
         /// </summary>
         public static void Remove(Player player)
         {
@@ -232,6 +264,14 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
             try
             {
                 StopFollowing(player);
+
+                if (ParentDeathCoroutines.TryGetValue(
+                        player,
+                        out CoroutineHandle deathCoroutine))
+                {
+                    Timing.KillCoroutines(deathCoroutine);
+                    ParentDeathCoroutines.Remove(player);
+                }
 
                 if (SpawnedSchematics.TryGetValue(
                         player,
@@ -252,15 +292,9 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
             {
                 LabApi.Features.Console.Logger.Error(
                     $"[PlayerSchematicManager] " +
-                    $"Ошибка удаления schematic у " +
+                    $"Ошибка удаления schematic игрока " +
                     $"{player.Nickname}:\n{ex}"
                 );
-
-                FollowCoroutines.Remove(player);
-                SpawnedSchematics.Remove(player);
-
-                DisableFade(player);
-                ResetScale(player);
             }
         }
 
@@ -298,11 +332,16 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
 
             SpawnedSchematics.TryGetValue(
                 player,
-                out SchematicObject schematic);
+                out SchematicObject schematic
+            );
 
             return schematic;
         }
 
+        /// <summary>
+        /// Полностью очищает все активные schematic'и
+        /// и все оставшиеся corpse schematic'и.
+        /// </summary>
         public static void ClearAll()
         {
             foreach (KeyValuePair<Player, SchematicObject> pair
@@ -315,6 +354,13 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                             out CoroutineHandle coroutine))
                     {
                         Timing.KillCoroutines(coroutine);
+                    }
+
+                    if (ParentDeathCoroutines.TryGetValue(
+                            pair.Key,
+                            out CoroutineHandle deathCoroutine))
+                    {
+                        Timing.KillCoroutines(deathCoroutine);
                     }
 
                     if (pair.Value != null)
@@ -332,16 +378,37 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                 {
                     LabApi.Features.Console.Logger.Error(
                         $"[PlayerSchematicManager] " +
-                        $"Ошибка очистки schematic:\n{ex}"
+                        $"Ошибка очистки player schematic:\n{ex}"
+                    );
+                }
+            }
+            foreach (SchematicObject corpse in CorpseSchematics)
+            {
+                try
+                {
+                    if (corpse != null)
+                    {
+                        corpse.Destroy();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LabApi.Features.Console.Logger.Error(
+                        $"[PlayerSchematicManager] " +
+                        $"Ошибка очистки corpse schematic:\n{ex}"
                     );
                 }
             }
 
             FollowCoroutines.Clear();
+            ParentDeathCoroutines.Clear();
             SpawnedSchematics.Clear();
+            CorpseSchematics.Clear();
         }
 
-        public static void SetScale(Player player, Vector3 scale)
+        public static void SetScale(
+            Player player,
+            Vector3 scale)
         {
             if (player == null)
                 return;
@@ -355,6 +422,49 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                 return;
 
             player.Scale = Vector3.one;
+        }
+
+        /// <summary>
+        /// Скрывает schematic конкретного игрока
+        /// только для указанного клиента.
+        /// </summary>
+        public static void HideFor(Player player)
+        {
+            if (player == null)
+                return;
+
+            if (!SpawnedSchematics.TryGetValue(
+                    player,
+                    out SchematicObject schematic) ||
+                schematic == null)
+            {
+                return;
+            }
+
+            NetworkConnectionToClient connection =
+                player.ReferenceHub.connectionToClient;
+
+            if (connection == null)
+                return;
+
+            foreach (NetworkIdentity identity in schematic.NetworkIdentities)
+            {
+                if (identity == null)
+                    continue;
+
+                if (!identity.observers.Remove(
+                        connection.connectionId))
+                {
+                    continue;
+                }
+
+                connection.Send(
+                    new ObjectDestroyMessage
+                    {
+                        netId = identity.netId
+                    }
+                );
+            }
         }
     }
 }

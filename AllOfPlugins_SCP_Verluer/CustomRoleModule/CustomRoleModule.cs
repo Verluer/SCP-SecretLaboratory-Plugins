@@ -15,12 +15,7 @@ namespace AllOfPlugins_SCP_Verluer.CustomRoleModule
   
         public static void Enable(Harmony harmony)
         {
-            int roll = UnityEngine.Random.Range(0, 100);
-            if (roll < 100)
-            {
                 HumanSCP.Enable();
-            }
-
         }
 
 

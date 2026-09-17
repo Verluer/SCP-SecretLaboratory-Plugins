@@ -124,7 +124,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActionEvent.cs" />
     <Compile Include="AllOfPlugins.cs" />
     <Compile Include="CandyExpansion\AllCandyExpansion.cs" />
     <Compile Include="CandyExpansion\BlackCandyExpansion.cs" />
@@ -138,6 +137,7 @@
     <Compile Include="CustomRoleModule\HumanSCP.cs" />
     <Compile Include="CustomRoleModule\PlayerSchematicManager.cs" />
     <Compile Include="EventModule\EventModule.cs" />
+    <Compile Include="EventModule\Scp261Event.cs" />
     <Compile Include="EventModule\ZombieApocalypse.cs" />
     <Compile Include="GamePatch\GamePatch.cs" />
     <Compile Include="GamePatch\GiveSpawnItem.cs" />
