@@ -1,4 +1,5 @@
-﻿using AllOfPlugins_SCP_Verluer.GamePatch;
+﻿using AllOfPlugins_SCP_Verluer.EventModule;
+using AllOfPlugins_SCP_Verluer.GamePatch;
 using LabApi.Events.CustomHandlers;
 using LabApi.Features.Console;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ public class MyKeybind : CustomEventsHandler
     {
         ServerSpecificSettingsSync.DefinedSettings = new ServerSpecificSettingBase[]
         {
-            new SSGroupHeader("Мои настройки"),
+            new SSGroupHeader("SCP Настройки"),
 
             new SSKeybindSetting(
                 KeybindId[0],
@@ -28,6 +29,14 @@ public class MyKeybind : CustomEventsHandler
                 "Говорить как обычный человек",
                 KeyCode.V,
                 hint: "Удерживайте V"
+            ),
+              new SSGroupHeader("Scp-261 Event Настройки"),
+
+            new SSKeybindSetting(
+                KeybindId[2],
+                "Получить Coin",
+                KeyCode.U,
+                hint: "Нажмите U"
             )
 
         };
@@ -63,6 +72,15 @@ public class MyKeybind : CustomEventsHandler
             ScpProximityVoice.HandleKey(
                 sender,
                 keybind.SyncIsPressed);
+
+            return;
+        }
+        if (setting.SettingId == KeybindId[2])
+        {
+            if (keybind.SyncIsPressed)
+            {
+                GiveSpawnItem.GiveCoin(sender);
+            }
 
             return;
         }

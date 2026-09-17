@@ -94,6 +94,8 @@ namespace AllOfPlugins_SCP_Verluer
 
             // Превращаем нашу schematic в "труп".
             PlayerSchematicManager.DetachAsCorpse(ev.Player);
+
+            PlayerSchematicManager.ShowFor(ev.Player);
         }
     }
 }

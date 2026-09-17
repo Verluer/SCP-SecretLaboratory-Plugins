@@ -466,5 +466,38 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                 );
             }
         }
+        public static void ShowFor(Player player)
+        {
+            if (player == null)
+                return;
+
+            if (!SpawnedSchematics.TryGetValue(
+                    player,
+                    out SchematicObject schematic) ||
+                schematic == null)
+            {
+                return;
+            }
+
+            NetworkConnectionToClient connection =
+                player.ReferenceHub.connectionToClient;
+
+            if (connection == null)
+                return;
+
+            foreach (NetworkIdentity identity in schematic.NetworkIdentities)
+            {
+                if (identity == null)
+                    continue;
+
+                if (identity.observers.ContainsKey(connection.connectionId))
+                    continue;
+
+                NetworkServer.Spawn(
+                    identity.gameObject,
+                    connection
+                );
+            }
+        }
     }
 }

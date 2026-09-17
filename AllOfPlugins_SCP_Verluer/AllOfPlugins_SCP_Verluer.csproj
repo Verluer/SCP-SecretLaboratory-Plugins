@@ -55,7 +55,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\ZombieStateTracker\ZombieStateTracker\bin\Debug\0Harmony.dll</HintPath>
+      <HintPath>C:\Users\Admin\AppData\Roaming\SCP Secret Laboratory\LabAPI\plugins\7777\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\..\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Assembly-CSharp.dll</HintPath>

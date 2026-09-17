@@ -53,5 +53,12 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                 ev.Player.AddItem(ItemType.Coin);
             });
         }
+        public static void GiveCoin(ReferenceHub hubsender)
+        {
+            if (hubsender.roleManager.CurrentRole.RoleTypeId == RoleTypeId.Tutorial)
+            {
+                Player.Get(hubsender).AddItem(ItemType.Coin);
+            }
+        }
     }
 }
