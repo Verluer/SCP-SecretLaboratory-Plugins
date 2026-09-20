@@ -70,9 +70,9 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
             VoiceEnabled[player] = enabled;
 
             if (enabled)
-                HUD.ShowProximity(player);
+                Core.HUD.ShowProximity(player);
             else
-                HUD.HideProximity(player);
+                Core.HUD.HideProximity(player);
         }
 
         private static void OnSendingVoiceMessage(

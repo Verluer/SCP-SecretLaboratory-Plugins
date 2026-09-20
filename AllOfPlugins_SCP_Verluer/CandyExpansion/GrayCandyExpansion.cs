@@ -52,30 +52,6 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
             ActivePlayers.Clear();
         }
 
-        private static bool GetCandyTranslationPrefix(
-            CandyKindID candyKind,
-            out string name,
-            out string desc,
-            out string fx)
-        {
-            if (candyKind != CandyKindID.Gray)
-            {
-                name = null;
-                desc = null;
-                fx = null;
-                return true;
-            }
-
-            name = "СЕРАЯ КОНФЕТА";
-
-            desc = "<color=purple>Даёт 80% резиста к любому типу урона, но так же замедляет в два раза на 10 секунд </color>" +
-                   "<color=purple>При падении вы перенаправляете весь получаемый урон в двойном объеме на окружающих</color>";
-
-            fx = "От конфеты исходит слабый запах холодного металла.";
-
-            return false;
-        }
-
         private static bool ServerApplyEffectsPrefix(ReferenceHub hub)
         {
             ApplyGrayCandyEffect(hub);

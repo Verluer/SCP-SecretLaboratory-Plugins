@@ -26,10 +26,14 @@ namespace AllOfPlugins_SCP_Verluer.EventModule
                     ZombieApocalypse.Enable();
                 }
                 int rollSCP261Event = UnityEngine.Random.Range(0, 100);
-                if (rollSCP261Event < 100)
+                if (rollSCP261Event < 5)
                 {
                     Scp261Event.Enable();
                 }
+                if (false)
+                {
+                    Test.Enable();
+                }; 
             };
 
             ServerEvents.RoundEnded += (ev) =>
@@ -47,6 +51,7 @@ namespace AllOfPlugins_SCP_Verluer.EventModule
             RoleAssigner.OnPlayersSpawned -= () =>
             {
                 ZombieApocalypse.Disable();
+                Scp261Event.Disable();
             };
 
                 ServerEvents.RoundEnded += (ev) =>

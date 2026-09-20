@@ -1,24 +1,8 @@
-﻿using CustomPlayerEffects;
-using Exiled.API.Features.Roles;
-using HarmonyLib;
-using InventorySystem;
+﻿using HarmonyLib;
 using InventorySystem.Items.Usables.Scp330;
-using LabApi.Events.Arguments.PlayerEvents;
-using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
-using MEC;
-using PlayerRoles;
-using PlayerStatsSystem;
-using ProjectMER.Features.Extensions;
-using Respawning.Objectives;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
-using System.Linq;
 using System.Reflection;
-using System.Security.AccessControl;
-using UnityEngine;
-using static PlayerList;
 
 namespace AllOfPlugins_SCP_Verluer.CandyExpansion
 {

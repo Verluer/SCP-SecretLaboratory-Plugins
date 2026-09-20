@@ -1,4 +1,6 @@
 ﻿using AllOfPlugins_SCP_Verluer.GamePatch;
+using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using MapGeneration;
 using MEC;
@@ -9,15 +11,17 @@ using System.Collections.Generic;
 using UncomplicatedCustomRoles.API.Enums;
 using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
+using UncomplicatedCustomRoles.API.Interfaces;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
-namespace AllOfPlugins_SCP_Verluer.CustomRoleModule
+namespace AllOfPlugins_SCP_Verluer.CustomModule.Role
 {
     public static class HumanSCP
     {
+        private static readonly HashSet<Player> HumanScpPlayers = new();
         private static HumanScpRole _role;
         public static bool SpawnHumanScpFromExistingScp()
         {
@@ -42,8 +46,7 @@ namespace AllOfPlugins_SCP_Verluer.CustomRoleModule
                 }
             }
 
-            // Должен существовать хотя бы один SCP.
-            if (scps.Count == 0 || scps.Count == 2)
+            if (scps.Count < 2)
             {
                 LabApi.Features.Console.Logger.Warn(
                     "[HumanSCP] Недостаточно SCP.");
@@ -78,30 +81,15 @@ namespace AllOfPlugins_SCP_Verluer.CustomRoleModule
 
 
             target.SetCustomRole(_role);
-
-
-            PlayerSchematicManager.Attach(
-                target,
-                "SCP-035",
-                new Vector3(0f, 0f, 0f),
-                Vector3.zero, true
-            );
-
-            Timing.CallDelayed(0.5f, () =>
-            {
-                PlayerSchematicManager.EnableFade(target);
-                //PlayerSchematicManager.SetScale(target, new Vector3(1.13f, 0.5f, 1.13f)); 
-                
-            });
-
-
-            LabApi.Features.Console.Logger.Info(
-                "[HumanSCP] Scp999 schematic успешно создан.");
+           
 
             LabApi.Features.Console.Logger.Info(
                 $"[HumanSCP] {target.Nickname} стал Human SCP.");
 
-
+            Timing.CallDelayed(0.5f, () =>
+            {
+                HumanScpPlayers.Add(target);
+            });
             return true;
         }
         private static void OnPlayersSpawned()
@@ -142,6 +130,7 @@ namespace AllOfPlugins_SCP_Verluer.CustomRoleModule
             {
                 RoleAssigner.OnPlayersSpawned += OnPlayersSpawned;
             }
+            PlayerEvents.ChangedRole += OnChangedRole;
 
         }
 
@@ -150,6 +139,15 @@ namespace AllOfPlugins_SCP_Verluer.CustomRoleModule
             RoleAssigner.OnPlayersSpawned -= OnPlayersSpawned;
 
             _role = null;
+            HumanScpPlayers.Clear();
+        }
+        private static void OnChangedRole(PlayerChangedRoleEventArgs ev)
+        {
+            HumanScpPlayers.Remove(ev.Player);
+        }
+        public static bool IsHumanScp(Player player)
+        {
+            return player != null && HumanScpPlayers.Contains(player);
         }
     }
 

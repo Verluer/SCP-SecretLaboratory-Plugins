@@ -3,7 +3,7 @@ using RueI.API;
 using RueI.API.Elements;
 using RueI.API.Elements.Enums;
 
-namespace AllOfPlugins_SCP_Verluer
+namespace AllOfPlugins_SCP_Verluer.Core
 {
     public static class HUD
     {

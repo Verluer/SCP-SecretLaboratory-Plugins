@@ -1,5 +1,4 @@
 ﻿using CentralAuth;
-using Exiled.API.Features.Roles;
 using HarmonyLib;
 using InventorySystem.Items.Usables.Scp330;
 using LabApi.Events.Arguments.PlayerEvents;

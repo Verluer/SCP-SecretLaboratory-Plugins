@@ -58,12 +58,12 @@ namespace AllOfPlugins_SCP_Verluer.EventModule
             Player.Get(SCP261Player).SendBroadcast("Поздравляем! Вы выбраны великим Scp261 как его апостол. Привнесите в этот мир больше лудомании!.", 5);
 
             SCP261Player.roleManager.ServerSetRole(RoleTypeId.Tutorial, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.UseSpawnpoint);
-            PlayerSchematicManager.Attach(Player.Get(SCP261Player), "Scp261", new Vector3(0f, -0.7f, 0f), Vector3.zero, true);
+            Core.PlayerSchematicManager.Attach(Player.Get(SCP261Player), "Scp261", new Vector3(0f, -0.65f, 0f), Vector3.zero, true);
 
             Timing.CallDelayed(0.5f, () =>
             {
-                PlayerSchematicManager.EnableFade(Player.Get(SCP261Player));
-                PlayerSchematicManager.HideFor(Player.Get(SCP261Player));
+                Core.PlayerSchematicManager.EnableFade(Player.Get(SCP261Player));
+                Core.PlayerSchematicManager.HideFor(Player.Get(SCP261Player));
                 Player.Get(SCP261Player).ClearInventory();
 
             });

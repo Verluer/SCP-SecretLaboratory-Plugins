@@ -4,6 +4,7 @@ using HarmonyLib;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.CustomHandlers;
 using LabApi.Events.Handlers;
+using MEC;
 using System;
 using UnityEngine;
 using VoiceChat.Networking;
@@ -36,7 +37,7 @@ namespace AllOfPlugins_SCP_Verluer
         }
 
         private Harmony _harmony;
-        private MyKeybind _myKeybind;
+        private Core.MyKeybind _myKeybind;
         public static float _roundStartTime;
         public override void Enable()
         {
@@ -54,9 +55,11 @@ namespace AllOfPlugins_SCP_Verluer
             PluginsPatch.PluginsPatch.Enable(_harmony);
             CandyExpansion.CandyExpansion.Enable(_harmony);
 
-            CustomRoleModule.CustomRoleModule.Enable(_harmony);
+            CustomModule.CustomModule.Enable(_harmony);
+
+            DoorManager.DoorManager.Enable();
     
-            _myKeybind = new MyKeybind();
+            _myKeybind = new Core.MyKeybind();
 
             CustomHandlersManager.RegisterEventsHandler(_myKeybind);
 
@@ -66,7 +69,8 @@ namespace AllOfPlugins_SCP_Verluer
         {
             GamePatch.GamePatch.Disable();
             EventModule.EventModule.Disable();
-            CustomRoleModule.CustomRoleModule.Disable();
+            CustomModule.CustomModule.Disable();
+            DoorManager.DoorManager.Disable();
             PluginsPatch.PluginsPatch.Disable();
             CandyExpansion.CandyExpansion.Disable();
 
@@ -83,19 +87,26 @@ namespace AllOfPlugins_SCP_Verluer
             CustomHandlersManager.UnregisterEventsHandler(_myKeybind);
 
             _myKeybind = null;
+
+
         }
         private static void OnSpawningRagdoll(PlayerSpawningRagdollEventArgs ev)
         {
-            if (!PlayerSchematicManager.HasSchematic(ev.Player))
+            if (!Core.PlayerSchematicManager.HasSchematic(ev.Player))
                 return;
 
             // Не создаём стандартный ragdoll.
             ev.IsAllowed = false;
 
-            // Превращаем нашу schematic в "труп".
-            PlayerSchematicManager.DetachAsCorpse(ev.Player);
+            Core.PlayerSchematicManager.DetachAsCorpse(ev.Player);
 
-            PlayerSchematicManager.ShowFor(ev.Player);
+            Timing.CallDelayed(0.1f, () =>
+            {
+                if (ev.Player == null)
+                    return;
+
+                Core.PlayerSchematicManager.ShowFor(ev.Player);
+            });
         }
     }
 }

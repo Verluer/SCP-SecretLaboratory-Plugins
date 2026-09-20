@@ -9,17 +9,20 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace AllOfPlugins_SCP_Verluer.GamePatch
+namespace AllOfPlugins_SCP_Verluer.Core
 {
     public static class PlayerSchematicManager
     {
         private static readonly Dictionary<Player, SchematicObject> SpawnedSchematics = new();
-
         private static readonly Dictionary<Player, CoroutineHandle> FollowCoroutines = new();
-
         private static readonly Dictionary<Player, CoroutineHandle> ParentDeathCoroutines = new();
+        private static readonly Dictionary<Player, SchematicObject> CorpseSchematics = new();
 
-        private static readonly List<SchematicObject> CorpseSchematics = new();
+        private static readonly System.Reflection.MethodInfo AddObserverMethod =
+            typeof(NetworkIdentity).GetMethod(
+                "AddObserver",
+                System.Reflection.BindingFlags.Instance |
+                System.Reflection.BindingFlags.NonPublic);
 
         public static bool Attach(
             Player player,
@@ -36,18 +39,15 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                 Remove(player);
 
                 GameObject playerObject = player.GameObject;
-
-                Transform playerTransform =
-                    playerObject != null
-                        ? playerObject.transform
-                        : null;
+                Transform playerTransform = playerObject != null
+                    ? playerObject.transform
+                    : null;
 
                 if (playerTransform == null)
                 {
                     LabApi.Features.Console.Logger.Warn(
                         $"[PlayerSchematicManager] " +
-                        $"У игрока {player.Nickname} отсутствует Transform."
-                    );
+                        $"У игрока {player.Nickname} отсутствует Transform.");
 
                     return false;
                 }
@@ -67,16 +67,14 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                     ObjectSpawner.SpawnSchematic(
                         schematicName,
                         position,
-                        rotation
-                    );
+                        rotation);
 
                 if (schematic == null)
                 {
                     LabApi.Features.Console.Logger.Warn(
                         $"[PlayerSchematicManager] " +
                         $"Не удалось создать schematic '{schematicName}' " +
-                        $"для {player.Nickname}."
-                    );
+                        $"для {player.Nickname}.");
 
                     return false;
                 }
@@ -93,9 +91,7 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                 {
                     schematic.transform.SetParent(
                         playerTransform,
-                        true
-                    );
-
+                        true);
                 }
                 else
                 {
@@ -105,9 +101,7 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                                 player,
                                 schematic,
                                 positionOffset,
-                                rotationOffsetQuaternion
-                            )
-                        );
+                                rotationOffsetQuaternion));
 
                     FollowCoroutines[player] = coroutine;
                 }
@@ -115,8 +109,7 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                 LabApi.Features.Console.Logger.Info(
                     $"[PlayerSchematicManager] " +
                     $"Schematic '{schematicName}' прикреплён к " +
-                    $"{player.Nickname}."
-                );
+                    $"{player.Nickname}.");
 
                 return true;
             }
@@ -125,8 +118,7 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                 LabApi.Features.Console.Logger.Error(
                     $"[PlayerSchematicManager] " +
                     $"Ошибка при создании schematic '{schematicName}' " +
-                    $"для {player.Nickname}:\n{ex}"
-                );
+                    $"для {player.Nickname}:\n{ex}");
 
                 return false;
             }
@@ -153,6 +145,7 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                 {
                     return;
                 }
+
                 StopFollowing(player);
 
                 if (ParentDeathCoroutines.TryGetValue(
@@ -163,29 +156,29 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                     ParentDeathCoroutines.Remove(player);
                 }
 
+                // Открепляем модель от игрока,
+                // сохраняя её мировую позицию.
                 schematic.transform.SetParent(null, true);
 
+                // Убираем из обычных schematic игрока.
                 SpawnedSchematics.Remove(player);
 
-                if (!CorpseSchematics.Contains(schematic))
-                {
-                    CorpseSchematics.Add(schematic);
-                }
+                // Но сохраняем связь:
+                // Player -> его corpse schematic.
+                CorpseSchematics[player] = schematic;
 
                 ResetScale(player);
 
                 LabApi.Features.Console.Logger.Info(
                     $"[PlayerSchematicManager] " +
                     $"Schematic игрока {player.Nickname} " +
-                    $"отсоединён и оставлен как corpse."
-                );
+                    $"отсоединён и оставлен как corpse.");
             }
             catch (Exception ex)
             {
                 LabApi.Features.Console.Logger.Error(
                     $"[PlayerSchematicManager] " +
-                    $"Ошибка DetachAsCorpse для {player.Nickname}:\n{ex}"
-                );
+                    $"Ошибка DetachAsCorpse для {player.Nickname}:\n{ex}");
             }
         }
 
@@ -195,16 +188,15 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
             Vector3 positionOffset,
             Quaternion rotationOffset)
         {
-            while (player != null &&
-                   schematic != null &&
-                   HasSchematic(player))
+            while (
+                player != null &&
+                schematic != null &&
+                HasSchematic(player))
             {
                 if (!player.IsAlive)
                 {
                     ResetScale(player);
-
                     FollowCoroutines.Remove(player);
-
                     yield break;
                 }
 
@@ -215,8 +207,7 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                 {
                     Vector3 worldOffset =
                         playerTransform.TransformDirection(
-                            positionOffset
-                        );
+                            positionOffset);
 
                     schematic.Position =
                         player.Position + worldOffset;
@@ -241,8 +232,7 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
             player.EnableEffect<Fade>(
                 byte.MaxValue,
                 0f,
-                false
-            );
+                false);
         }
 
         public static void DisableFade(Player player)
@@ -278,9 +268,7 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                         out SchematicObject schematic))
                 {
                     if (schematic != null)
-                    {
                         schematic.Destroy();
-                    }
 
                     SpawnedSchematics.Remove(player);
                 }
@@ -293,8 +281,7 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                 LabApi.Features.Console.Logger.Error(
                     $"[PlayerSchematicManager] " +
                     $"Ошибка удаления schematic игрока " +
-                    $"{player.Nickname}:\n{ex}"
-                );
+                    $"{player.Nickname}:\n{ex}");
             }
         }
 
@@ -332,8 +319,7 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
 
             SpawnedSchematics.TryGetValue(
                 player,
-                out SchematicObject schematic
-            );
+                out SchematicObject schematic);
 
             return schematic;
         }
@@ -364,9 +350,7 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                     }
 
                     if (pair.Value != null)
-                    {
                         pair.Value.Destroy();
-                    }
 
                     if (pair.Key != null)
                     {
@@ -378,25 +362,23 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                 {
                     LabApi.Features.Console.Logger.Error(
                         $"[PlayerSchematicManager] " +
-                        $"Ошибка очистки player schematic:\n{ex}"
-                    );
+                        $"Ошибка очистки player schematic:\n{ex}");
                 }
             }
-            foreach (SchematicObject corpse in CorpseSchematics)
+
+            foreach (KeyValuePair<Player, SchematicObject> pair
+                     in CorpseSchematics)
             {
                 try
                 {
-                    if (corpse != null)
-                    {
-                        corpse.Destroy();
-                    }
+                    if (pair.Value != null)
+                        pair.Value.Destroy();
                 }
                 catch (Exception ex)
                 {
                     LabApi.Features.Console.Logger.Error(
                         $"[PlayerSchematicManager] " +
-                        $"Ошибка очистки corpse schematic:\n{ex}"
-                    );
+                        $"Ошибка очистки corpse schematic:\n{ex}");
                 }
             }
 
@@ -447,7 +429,8 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
             if (connection == null)
                 return;
 
-            foreach (NetworkIdentity identity in schematic.NetworkIdentities)
+            foreach (NetworkIdentity identity
+                     in schematic.NetworkIdentities)
             {
                 if (identity == null)
                     continue;
@@ -462,22 +445,32 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                     new ObjectDestroyMessage
                     {
                         netId = identity.netId
-                    }
-                );
+                    });
             }
         }
+
         public static void ShowFor(Player player)
         {
             if (player == null)
                 return;
 
-            if (!SpawnedSchematics.TryGetValue(
+            SchematicObject schematic = null;
+
+            if (SpawnedSchematics.TryGetValue(
                     player,
-                    out SchematicObject schematic) ||
-                schematic == null)
+                    out SchematicObject activeSchematic))
             {
-                return;
+                schematic = activeSchematic;
             }
+            else if (CorpseSchematics.TryGetValue(
+                         player,
+                         out SchematicObject corpseSchematic))
+            {
+                schematic = corpseSchematic;
+            }
+
+            if (schematic == null)
+                return;
 
             NetworkConnectionToClient connection =
                 player.ReferenceHub.connectionToClient;
@@ -485,18 +478,40 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
             if (connection == null)
                 return;
 
-            foreach (NetworkIdentity identity in schematic.NetworkIdentities)
+            if (AddObserverMethod == null)
+            {
+                LabApi.Features.Console.Logger.Error(
+                    "[PlayerSchematicManager] " +
+                    "Не найден internal NetworkIdentity.AddObserver().");
+
+                return;
+            }
+
+            foreach (NetworkIdentity identity
+                     in schematic.NetworkIdentities)
             {
                 if (identity == null)
                     continue;
 
-                if (identity.observers.ContainsKey(connection.connectionId))
+                if (identity.observers.ContainsKey(
+                        connection.connectionId))
+                {
                     continue;
+                }
 
-                NetworkServer.Spawn(
-                    identity.gameObject,
-                    connection
-                );
+                try
+                {
+                    AddObserverMethod.Invoke(
+                        identity,
+                        new object[] { connection });
+                }
+                catch (Exception ex)
+                {
+                    LabApi.Features.Console.Logger.Error(
+                        $"[PlayerSchematicManager] " +
+                        $"Ошибка AddObserver для netId={identity.netId} " +
+                        $"игрока {player.Nickname}:\n{ex}");
+                }
             }
         }
     }

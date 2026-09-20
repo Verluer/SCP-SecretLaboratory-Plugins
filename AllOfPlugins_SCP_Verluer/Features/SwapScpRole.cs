@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace AllOfPlugins_SCP_Verluer.GamePatch
+namespace AllOfPlugins_SCP_Verluer.Features
 {
     public class SwapScpRole
     {

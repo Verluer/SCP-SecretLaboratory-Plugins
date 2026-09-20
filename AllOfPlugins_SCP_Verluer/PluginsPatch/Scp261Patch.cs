@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace AllOfPlugins_SCP_Verluer
+namespace AllOfPlugins_SCP_Verluer.PluginsPatch
 {
     public static class Scp261Patch
     {
