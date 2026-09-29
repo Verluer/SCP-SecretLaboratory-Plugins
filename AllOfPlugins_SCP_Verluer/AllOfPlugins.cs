@@ -1,10 +1,12 @@
-﻿using AllOfPlugins_SCP_Verluer.EventModule;
+﻿using AllOfPlugins_SCP_Verluer.Core;
+using AllOfPlugins_SCP_Verluer.EventModule;
 using AllOfPlugins_SCP_Verluer.GamePatch;
 using HarmonyLib;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.CustomHandlers;
 using LabApi.Events.Handlers;
 using MEC;
+using PlayerRoles.RoleAssign;
 using System;
 using UnityEngine;
 using VoiceChat.Networking;
@@ -45,10 +47,6 @@ namespace AllOfPlugins_SCP_Verluer
 
             EventModule.EventModule.Enable(_harmony);
 
-            ServerEvents.RoundStarted += () =>
-            {
-                _roundStartTime = Time.time;
-            };
             PlayerEvents.SpawningRagdoll += OnSpawningRagdoll;
 
             GamePatch.GamePatch.Enable(_harmony);
@@ -63,6 +61,11 @@ namespace AllOfPlugins_SCP_Verluer
 
             CustomHandlersManager.RegisterEventsHandler(_myKeybind);
 
+            RoleAssigner.OnPlayersSpawned += () =>
+            {
+                _roundStartTime = Time.time;
+                HUD.AllPlayerHud();
+            };
         }
 
         public override void Disable()
@@ -95,7 +98,6 @@ namespace AllOfPlugins_SCP_Verluer
             if (!Core.PlayerSchematicManager.HasSchematic(ev.Player))
                 return;
 
-            // Не создаём стандартный ragdoll.
             ev.IsAllowed = false;
 
             Core.PlayerSchematicManager.DetachAsCorpse(ev.Player);

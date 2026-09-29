@@ -130,10 +130,12 @@
     <Compile Include="CustomModule\CustomModule.cs" />
     <Compile Include="CustomModule\Role\HumanSCP.cs" />
     <Compile Include="DoorManager\ScpDoorBlocker.cs" />
+    <Compile Include="DoorManager\WarheadDoorController.cs" />
     <Compile Include="DoorManager\ZombieDoorController.cs" />
     <Compile Include="EventModule\Test.cs" />
     <Compile Include="DoorManager\DoorIdLogger.cs" />
     <Compile Include="DoorManager\DoorManager.cs" />
+    <Compile Include="GamePatch\CountSpawnSCP.cs" />
     <Compile Include="GamePatch\Scp049-2Punishment.cs" />
     <Compile Include="Core\PlayerSchematicManager.cs" />
     <Compile Include="EventModule\EventModule.cs" />
@@ -145,6 +147,7 @@
     <Compile Include="Features\SwapScpRole.cs" />
     <Compile Include="Core\HUD.cs" />
     <Compile Include="Core\MyKeyBind.cs" />
+    <Compile Include="GamePatch\WaveRespawn.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PluginsPatch\PluginsPatch.cs" />
     <Compile Include="PluginsPatch\Scp261Patch.cs" />

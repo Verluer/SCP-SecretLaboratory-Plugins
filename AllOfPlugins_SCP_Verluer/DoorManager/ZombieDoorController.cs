@@ -25,7 +25,6 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
 
         private static readonly string[] Medium_Door_Name = new string[]
         {
-            "CHECKPOINT_EZ_HCZ_A",
             "106_SECONDARY",
             "106_PRIMARY",
         };
@@ -36,7 +35,12 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
             "GATE_B",
             "HID_CHAMBER",
         };
+        private static readonly string[] UnBlocked_Medium_Door_Name = new string[]
+        {
+            "CHECKPOINT_EZ_HCZ_A",
 
+            };
+        private static bool IsDecontaminationActive = false;
         private static readonly List<ReferenceHub> PlayerNoScp =
             new List<ReferenceHub>();
 
@@ -46,6 +50,8 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
         {
             PlayerEvents.InteractingDoor += OnInteractingDoor;
             RoleAssigner.OnPlayersSpawned += OnPlayersSpawned;
+
+            ServerEvents.LczDecontaminationStarted += OnLczDecontaminationStarted;
 
             LabApi.Features.Console.Logger.Info(
                 "[ZombieDoorController] Enabled."
@@ -57,13 +63,24 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
             PlayerEvents.InteractingDoor -= OnInteractingDoor;
             RoleAssigner.OnPlayersSpawned -= OnPlayersSpawned;
 
+            ServerEvents.LczDecontaminationStarted -= OnLczDecontaminationStarted;
+
+            IsDecontaminationActive = false;
+
             PlayerNoScp.Clear();
 
             LabApi.Features.Console.Logger.Info(
                 "[ZombieDoorController] Disabled."
             );
         }
+        private static void OnLczDecontaminationStarted()
+        {
+            IsDecontaminationActive = true;
 
+            LabApi.Features.Console.Logger.Info(
+                "[ScpDoorBlocker] LCZ Decontamination started."
+            );
+        }
         private static void OnPlayersSpawned()
         {
             PlayerNoScp.Clear();
@@ -189,20 +206,10 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
             string doorName = door.DoorName;
 
             return
-                IsDoorInArray(
-                    Easy_Door_Name,
-                    doorName
-                )
-                ||
-                IsDoorInArray(
-                    Medium_Door_Name,
-                    doorName
-                )
-                ||
-                IsDoorInArray(
-                    Hard_Door_Name,
-                    doorName
-                );
+                IsDoorInArray(Easy_Door_Name, doorName) ||
+                IsDoorInArray(Medium_Door_Name, doorName) ||
+                IsDoorInArray(Hard_Door_Name, doorName) ||
+                (!IsDecontaminationActive && IsDoorInArray(UnBlocked_Medium_Door_Name, doorName));
         }
 
         private static bool IsZombieSpecialDoor(
@@ -252,7 +259,16 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
                     return true;
                 }
             }
+            int blockedRequired = GetRequiredZombieCount(0.60f);
 
+            if (zombieCount >= easyRequired)
+            {
+                if (IsDoorInArray(
+                    UnBlocked_Medium_Door_Name, doorName))
+                {
+                    return true;
+                }
+            }
             return false;
         }
 
@@ -299,6 +315,11 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
             {
                 percentage = 0.40f;
                 category = "EASY";
+            }
+            else if (IsDoorInArray(UnBlocked_Medium_Door_Name, door.DoorName))
+            {
+                percentage = 0.60f;
+                category = "Office";
             }
             else
             {

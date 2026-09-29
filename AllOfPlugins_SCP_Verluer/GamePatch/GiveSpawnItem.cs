@@ -17,11 +17,15 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
         public static void Enable()
         {
             PlayerEvents.ChangedRole += OnChangedRole;
+
+            PlayerEvents.Escaped += OnEscaped;
         }
 
         public static void Disable()
         {
             PlayerEvents.ChangedRole -= OnChangedRole;
+
+            PlayerEvents.Escaped -= OnEscaped;
             CoinScheduled.Clear();
         }
 
@@ -52,6 +56,23 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
 
                 ev.Player.AddItem(ItemType.Coin);
             });
+        }
+        private static void OnEscaped(PlayerEscapedEventArgs ev)
+        {
+            LabApi.Features.Console.Logger.Info($"[GiveSpawnItem] Escaped: {ev.Player.Nickname}, Role = {ev.Player.Role}");
+            if (ev.Player.Role == RoleTypeId.ChaosConscript)
+            {
+                ev.Player.AddItem(ItemType.GunLogicer);
+                ev.Player.AddAmmo(ItemType.Ammo762x39, 120);
+                ev.Player.AddAmmo(ItemType.Ammo556x45, 120);
+
+            }
+            if (ev.Player.Role == RoleTypeId.NtfSpecialist)
+            {
+                ev.Player.AddItem(ItemType.GunFRMG0);
+                ev.Player.AddAmmo(ItemType.Ammo762x39, 120);
+                ev.Player.AddAmmo(ItemType.Ammo556x45, 120);
+            }
         }
         public static void GiveCoin(ReferenceHub hubsender)
         {

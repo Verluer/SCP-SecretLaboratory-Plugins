@@ -68,6 +68,7 @@ namespace AllOfPlugins_SCP_Verluer.EventModule
             Timing.CallDelayed(55f, () =>
             {
                 Player.Get(ZombiePlayer).SendBroadcast("Последние силы покидают вас. <color=red>Чума</color> поглощает ваше тело...", 5);
+                Player.Get(ZombiePlayer).Kill();
             });
             Timing.CallDelayed(60f, () =>
             {

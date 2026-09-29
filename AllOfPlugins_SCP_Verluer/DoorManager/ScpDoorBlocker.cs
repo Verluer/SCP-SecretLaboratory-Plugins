@@ -32,8 +32,8 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
 
             RoleAssigner.OnPlayersSpawned += OnPlayersSpawned;
 
-            ServerEvents.LczDecontaminationStarted +=
-                OnLczDecontaminationStarted;
+            ServerEvents.LczDecontaminationStarted += OnLczDecontaminationStarted;
+
 
             foreach (DoorVariant door in DoorVariant.AllDoors)
             {

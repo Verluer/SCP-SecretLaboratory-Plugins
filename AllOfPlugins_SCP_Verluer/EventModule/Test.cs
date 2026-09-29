@@ -3,7 +3,10 @@ using CentralAuth;
 using LabApi.Features.Wrappers;
 using MEC;
 using PlayerRoles;
+using ProjectMER.Features;
+using ProjectMER.Features.Objects;
 using RemoteAdmin.Communication;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
@@ -56,6 +59,8 @@ namespace AllOfPlugins_SCP_Verluer.EventModule
                 Core.PlayerSchematicManager.HideFor(Player.Get(SCP261Player));
 
             });
+
+           
         }
       
     }
