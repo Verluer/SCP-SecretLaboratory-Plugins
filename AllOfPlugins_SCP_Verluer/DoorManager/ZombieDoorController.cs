@@ -27,6 +27,7 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
         {
             "106_SECONDARY",
             "106_PRIMARY",
+            "SURFACE_GATE",
         };
 
         private static readonly string[] Hard_Door_Name = new string[]
@@ -39,7 +40,7 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
         {
             "CHECKPOINT_EZ_HCZ_A",
 
-            };
+        };
         private static bool IsDecontaminationActive = false;
         private static readonly List<ReferenceHub> PlayerNoScp =
             new List<ReferenceHub>();

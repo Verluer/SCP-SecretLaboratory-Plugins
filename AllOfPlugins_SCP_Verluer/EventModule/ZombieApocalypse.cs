@@ -1,4 +1,6 @@
-﻿using CentralAuth;
+﻿using AllOfPlugins_SCP_Verluer.Core;
+using CentralAuth;
+using CustomPlayerEffects;
 using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
 using MEC;
@@ -73,6 +75,8 @@ namespace AllOfPlugins_SCP_Verluer.EventModule
             Timing.CallDelayed(60f, () =>
             {
                 HealthStat health = ZombiePlayer.playerStats.GetModule<HealthStat>();
+                MovementBoost boost = ZombiePlayer.playerEffectsController.GetEffect<MovementBoost>();
+
                 ZombiePlayer.roleManager.ServerSetRole(RoleTypeId.Scp0492, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.None);
                 LabApi.Features.Console.Logger.Info($"Zombie: {ZombiePlayer.nicknameSync.MyNick}");
                 if (ZombiePlayer.roleManager.CurrentRole is IHumeShieldedRole shieldedRole)
@@ -85,6 +89,8 @@ namespace AllOfPlugins_SCP_Verluer.EventModule
                 }
                 health.MaxValue = 2000f;
                 health.CurValue = 1500f;
+                boost.Intensity = 35;
+
                 Player.Get(ZombiePlayer).SendBroadcast(
                     $"Ваше тело поглотила <color=red>чума</color>. Как нулевой пациент вы распространяете <color=red>Чуму</color> при поедании других существ",
                     15

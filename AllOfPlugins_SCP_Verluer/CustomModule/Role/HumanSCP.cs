@@ -1,4 +1,5 @@
 ﻿using AllOfPlugins_SCP_Verluer.GamePatch;
+using CentralAuth;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
@@ -22,7 +23,7 @@ namespace AllOfPlugins_SCP_Verluer.CustomModule.Role
     public static class HumanSCP
     {
         private static readonly HashSet<Player> HumanScpPlayers = new();
-        private static HumanScpRole _role;
+        public static HumanScpRole _role;
         public static bool SpawnHumanScpFromExistingScp()
         {
             if (_role == null)
@@ -81,9 +82,17 @@ namespace AllOfPlugins_SCP_Verluer.CustomModule.Role
 
 
             target.SetCustomRole(_role);
-           
 
-            LabApi.Features.Console.Logger.Info(
+            foreach (ReferenceHub hub in ReferenceHub.AllHubs)
+            {
+                if (hub == null || hub.Mode == ClientInstanceMode.DedicatedServer)
+                    continue;
+                if (hub.roleManager.CurrentRole.Team == Team.SCPs)
+                {
+                    Player.Get(hub).SendBroadcast("Ваш союзник - человекоподобный SCP. Он вас не слышит, но вы можете на него положится.", 10);
+                }
+            }
+                LabApi.Features.Console.Logger.Info(
                 $"[HumanSCP] {target.Nickname} стал Human SCP.");
 
             Timing.CallDelayed(0.5f, () =>
@@ -169,19 +178,15 @@ namespace AllOfPlugins_SCP_Verluer.CustomModule.Role
 
         public override string BadgeColor { get; set; } = "";
 
-        // Основа роли
         public override RoleTypeId Role { get; set; } =
             RoleTypeId.ClassD;
 
-        // Но команда — SCP.
         public override Team? Team { get; set; } =
             PlayerRoles.Team.SCPs;
 
-        // Внешность остаётся D-Class.
         public override RoleTypeId RoleAppearance { get; set; } =
             RoleTypeId.ClassD;
 
-        // Human SCP является союзником обычных SCP.
         public override List<Team> IsFriendOf { get; set; } =
             new List<Team>
             {
@@ -233,7 +238,7 @@ namespace AllOfPlugins_SCP_Verluer.CustomModule.Role
         public override string SpawnBroadcast { get; set; } =
             "Вы стали человекоподобным SCP!";
 
-        public override ushort SpawnBroadcastDuration { get; set; } = 5;
+        public override ushort SpawnBroadcastDuration { get; set; } = 10;
 
         public override string SpawnHint { get; set; } = "";
 

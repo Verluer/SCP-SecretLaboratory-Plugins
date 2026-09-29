@@ -61,11 +61,7 @@ namespace AllOfPlugins_SCP_Verluer
 
             CustomHandlersManager.RegisterEventsHandler(_myKeybind);
 
-            RoleAssigner.OnPlayersSpawned += () =>
-            {
-                _roundStartTime = Time.time;
-                HUD.AllPlayerHud();
-            };
+            RoleAssigner.OnPlayersSpawned += OnPlayersSpawned;
         }
 
         public override void Disable()
@@ -88,10 +84,16 @@ namespace AllOfPlugins_SCP_Verluer
             _myKeybind?.Dispose();
 
             CustomHandlersManager.UnregisterEventsHandler(_myKeybind);
+            RoleAssigner.OnPlayersSpawned -= OnPlayersSpawned;
 
             _myKeybind = null;
 
 
+        }
+        private static void OnPlayersSpawned()
+        {
+            _roundStartTime = Time.time;
+            HUD.AllPlayerHud();
         }
         private static void OnSpawningRagdoll(PlayerSpawningRagdollEventArgs ev)
         {

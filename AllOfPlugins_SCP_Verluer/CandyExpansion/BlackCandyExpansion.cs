@@ -1,5 +1,9 @@
-﻿using CentralAuth;
+﻿using AllOfPlugins_SCP_Verluer.CustomModule.Role;
+using CentralAuth;
+using Christmas.Scp2536.Gifts;
+using CustomPlayerEffects;
 using HarmonyLib;
+using InventorySystem.Items.MicroHID.Modules;
 using InventorySystem.Items.Usables.Scp330;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
@@ -15,6 +19,12 @@ using Respawning.Objectives;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UncomplicatedCustomRoles.API.Enums;
+using UncomplicatedCustomRoles.API.Features;
+using UncomplicatedCustomRoles.API.Features.Behaviour;
+using UncomplicatedCustomRoles.API.Interfaces;
+using UncomplicatedCustomRoles.Extensions;
+using UncomplicatedCustomRoles.Manager;
 
 namespace AllOfPlugins_SCP_Verluer.CandyExpansion
 {
@@ -34,11 +44,12 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
                     OrangeCandyExpansion.ApplyOrangeCandyEffect,
 
         };
-        private static readonly RoleTypeId[] ScpRoles =
+        private static string[] ScpRoles =
         {
-                RoleTypeId.Scp0492,
-                RoleTypeId.Scp3114
-            };
+            "Scp0492",
+            "Scp3114",
+            "HumanScp",
+        };
         public static void Enable(Harmony _harmony)
         {
             MethodInfo method = AccessTools.Method(typeof(CandyBlack), "ServerApplyEffects");
@@ -78,11 +89,14 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
             switch (roll)
             {
                 case 0:
-                    hub.roleManager.ServerSetRole(ScpRoles[UnityEngine.Random.Range(0, ScpRoles.Length)], RoleChangeReason.RemoteAdmin, RoleSpawnFlags.None);
-                    HealthStat health = hub.playerStats.GetModule<HealthStat>();
+                    string playerScpRole = ScpRoles[UnityEngine.Random.Range(0, ScpRoles.Length)];
 
-                    if (hub.roleManager.CurrentRole.RoleTypeId == RoleTypeId.Scp0492)
+                    HealthStat health = hub.playerStats.GetModule<HealthStat>();
+                    MovementBoost boost = hub.playerEffectsController.GetEffect<MovementBoost>();
+
+                    if (playerScpRole == "Scp0492")
                     {
+                        hub.roleManager.ServerSetRole(RoleTypeId.Scp0492, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.None);
                         if (hub.roleManager.CurrentRole is IHumeShieldedRole shieldedRole)
                         {
                             var shield = shieldedRole.HumeShieldModule;
@@ -92,6 +106,8 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
                         }
                         health.MaxValue = 2000f;
                         health.CurValue = 1500f;
+                        boost.Intensity = 35;
+
                         Timing.CallDelayed(10f, () =>
                         {
                             Player.Get(hub).SendHint(
@@ -100,8 +116,9 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
                             );
                         });
                     }
-                    if (hub.roleManager.CurrentRole.RoleTypeId == RoleTypeId.Scp3114)
+                    if (playerScpRole == "Scp03114")
                     {
+                        hub.roleManager.ServerSetRole(RoleTypeId.Scp3114, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.None);
                         if (hub.roleManager.CurrentRole is IHumeShieldedRole shieldedRole)
                         {
                             var shield = shieldedRole.HumeShieldModule;
@@ -114,6 +131,10 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
                         health.MaxValue = 750f;
                         health.CurValue = 750f;
                     }
+                    if (playerScpRole == "HumanScp")
+                    {
+                        Player.Get(hub).SetCustomRole(HumanSCP._role);
+                    }
                     foreach (ReferenceHub _hub in ReferenceHub.AllHubs)
                     {
                         if (_hub == null || _hub.Mode == ClientInstanceMode.DedicatedServer)
@@ -123,11 +144,11 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
 
                         if (player == null)
                             continue;
+                        Timing.CallDelayed(5f, () =>
+                        {
+                            player.SendBroadcast("Обнаружен новый <color=red>SCP-объект</color> в комплексе", 10);
+                        });
 
-                        player.SendHint(
-                            "Обнаружен новый <color=red>SCP-объект</color> в комплексе",
-                            5f
-                        );
                     }
 
                     return false;

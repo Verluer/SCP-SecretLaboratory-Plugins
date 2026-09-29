@@ -169,6 +169,8 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
 
                 if (player.Role == RoleTypeId.Scp0492)
                     continue;
+                if (player.Role == RoleTypeId.Scp3114)
+                    continue;
 
                 if (player.Team != Team.SCPs)
                     continue;
