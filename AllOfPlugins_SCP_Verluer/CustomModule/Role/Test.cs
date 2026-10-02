@@ -219,7 +219,7 @@ namespace AllOfPlugins_SCP_Verluer.CustomModule.Role
 
         public override string SpawnBroadcast { get; set; } = "Вы - предатель. Вы предали сначала D-class, а теперь и SCP. Если о вашем предательстве узнают - то на вас будет охотится и SCP";
 
-        public override ushort SpawnBroadcastDuration { get; set; } = 0;
+        public override ushort SpawnBroadcastDuration { get; set; } = 10;
 
         public override string SpawnHint { get; set; } = "";
 

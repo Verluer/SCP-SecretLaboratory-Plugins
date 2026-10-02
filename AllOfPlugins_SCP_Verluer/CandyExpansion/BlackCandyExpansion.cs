@@ -12,6 +12,7 @@ using PlayerStatsSystem;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Utils;
 
 namespace AllOfPlugins_SCP_Verluer.CandyExpansion
 {
@@ -146,8 +147,7 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
                     int rollboom = UnityEngine.Random.Range(0, 100);
                     if (rollboom < 50)
                     {
-                        ExplosionOutcome explosionOutcome = new ExplosionOutcome();
-                        explosionOutcome.ServerGrant(hub);
+                        ExplosionUtils.ServerExplode(hub, ExplosionType.PinkCandy);
                     }
                     else
                     {
