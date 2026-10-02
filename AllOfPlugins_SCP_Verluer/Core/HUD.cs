@@ -1,29 +1,23 @@
 ﻿using CentralAuth;
 using LabApi.Features.Wrappers;
-using MEC;
-using RemoteAdmin.Communication;
+using PlayerStatsSystem;
 using RueI.API;
 using RueI.API.Elements;
 using RueI.API.Elements.Enums;
 using System;
-using System.Collections.Generic;
-using Unity.Profiling;
 using UnityEngine;
 
 namespace AllOfPlugins_SCP_Verluer.Core
 {
     public static class HUD
     {
-        private static readonly Tag ProximityModeTag =
-            new Tag("proximity_mode");
+        private static readonly Tag ProximityModeTag = new Tag("proximity_mode");
 
-        private static readonly Tag RoundTimeTag =
-    new Tag("round_time_custom");
+        private static readonly Tag RoundTimeTag = new Tag("round_time_custom");
+        private static readonly Tag ScpHood = new Tag("Scp_Hood");
         public static void ShowProximity(ReferenceHub player)
         {
-            BasicElement element = new BasicElement(
-                200f,
-                "<space=-1000><color=yellow>Proximity SCP Chat Active</color>")
+            BasicElement element = new BasicElement(200f, "<space=-1000><color=yellow>Proximity SCP Chat Active</color>")
             {
                 ZIndex = 10,
                 VerticalAlign = VerticalAlign.Down
@@ -36,10 +30,72 @@ namespace AllOfPlugins_SCP_Verluer.Core
 
         public static void HideProximity(ReferenceHub player)
         {
-            RueDisplay.Get(player).Remove(
-                ProximityModeTag);
+            RueDisplay.Get(player).Remove(ProximityModeTag);
         }
+        public static void ScpHpHood()
+        {
+            foreach (ReferenceHub viewer in ReferenceHub.AllHubs)
+            {
+                if (viewer == null ||
+                    viewer.Mode == ClientInstanceMode.DedicatedServer)
+                    continue;
 
+                RueDisplay display = RueDisplay.Get(viewer);
+
+                if (viewer.roleManager.CurrentRole.Team != PlayerRoles.Team.SCPs)
+                {
+                    display.Remove(ScpHood);
+                    continue;
+                }
+
+                DynamicElement element = new DynamicElement(850f, _ =>
+                {
+                    string result = "<space=700><color=white>SCP State:</color>\n";
+
+                    foreach (ReferenceHub hub in ReferenceHub.AllHubs)
+                    {
+                        if (hub == null ||
+                            hub.Mode == ClientInstanceMode.DedicatedServer ||
+                            hub.roleManager.CurrentRole.Team != PlayerRoles.Team.SCPs)
+                            continue;
+
+                        Player player = Player.Get(hub);
+
+                        if (player == null)
+                            continue;
+
+                        string Nick = player.Nickname.Length > 4
+                            ? player.Nickname.Substring(0, 4)
+                            : player.Nickname;
+                        string role = hub.roleManager.CurrentRole.RoleTypeId.ToString();
+
+                        HealthStat hp = hub.playerStats.GetModule<HealthStat>();
+                        HumeShieldStat shield = hub.playerStats.GetModule<HumeShieldStat>();
+
+
+                        result +=
+                            $"<space=750><color=blue>{Nick}</color> || " +
+                            $"<color=red>{role}</color> || " +
+                            $"<color=green>{hp.CurValue:0}</color>:" +
+                            $"<color=grey>{shield.CurValue:0}</color>\n";
+                    }
+
+                    return result;
+                })
+                {
+                    ZIndex = 10,
+                    VerticalAlign = VerticalAlign.Down,
+                    UpdateInterval = TimeSpan.FromSeconds(0.1f),
+                    ShowToSpectators = false
+                };
+
+                display.Show(ScpHood, element);
+            }
+        }
+        public static void HideScpHood(ReferenceHub player)
+        {
+            RueDisplay.Get(player).Remove(ScpHood);
+        }
         public static void AllPlayerHud()
         {
             foreach (ReferenceHub hub in ReferenceHub.AllHubs)
@@ -47,11 +103,9 @@ namespace AllOfPlugins_SCP_Verluer.Core
                 if (hub == null || hub.Mode == ClientInstanceMode.DedicatedServer)
                     continue;
     
-                DynamicElement element = new DynamicElement(
-                    975f,
-                    _ =>
+                DynamicElement element = new DynamicElement(975f,_ =>
                     {
-                        float elapsed = Time.time - AllOfPlugins._roundStartTime;
+                        float elapsed = Time.time - EventModule.VanillaEventHandler.RoundStartTime;
 
                         int minutes = Mathf.FloorToInt(elapsed / 60f);
                         int seconds = Mathf.FloorToInt(elapsed % 60f);
@@ -65,9 +119,7 @@ namespace AllOfPlugins_SCP_Verluer.Core
                     ShowToSpectators = false
                 };
 
-                RueDisplay.Get(hub).Show(
-                    RoundTimeTag,
-                    element);
+                RueDisplay.Get(hub).Show(RoundTimeTag, element);
             }
         }
     }

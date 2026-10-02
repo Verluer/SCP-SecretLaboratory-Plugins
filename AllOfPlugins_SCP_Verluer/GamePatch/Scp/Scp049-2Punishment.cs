@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-namespace AllOfPlugins_SCP_Verluer.GamePatch
+namespace AllOfPlugins_SCP_Verluer.GamePatch.Scp
 {
     public static class Scp049_2Punishment
     {

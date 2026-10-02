@@ -8,36 +8,26 @@ namespace AllOfPlugins_SCP_Verluer.Core
 {
     public class MyKeybind : CustomEventsHandler
     {
-        private static readonly int[] KeybindId = { 1, 2, 3 };
-        private static readonly HashSet<ReferenceHub> PressedKeys =
-        new HashSet<ReferenceHub>();
+        private static readonly int[] KeybindId = { 1, 2, 3, 4 };
+        private static  bool ScpHoodActive = true;
 
         public override void OnServerWaitingForPlayers()
         {
             ServerSpecificSettingsSync.DefinedSettings = new ServerSpecificSettingBase[]
             {
-            new SSGroupHeader("SCP Настройки"),
+            
+                new SSGroupHeader("SCP Настройки"),
+            
+                new SSKeybindSetting(KeybindId[0], "Кнопка обмена SCP-ролями", KeyCode.Y, hint: "Обе стороны для обмена должны один раз нажать кнопку обмена"),
 
-            new SSKeybindSetting(
-                KeybindId[0],
-                "Кнопка обмена SCP-ролями",
-                KeyCode.Y,
-                hint: "Нажмите Y"
-            ),
-            new SSKeybindSetting(
-                KeybindId[1],
-                "Говорить как обычный человек",
-                KeyCode.V,
-                hint: "Удерживайте V"
-            ),
-              new SSGroupHeader("Scp-261 Event Настройки"),
+                new SSKeybindSetting(KeybindId[1],"Говорить как обычный человек", KeyCode.V, hint: "При разговоре с включенным режимом - вас будут слышать другие игроки, но не будет слышать напарник"),
+                
+                new SSKeybindSetting(KeybindId[2],"Scp Hood", KeyCode.U, hint: "Включает Scp State Hood"),
 
-            new SSKeybindSetting(
-                KeybindId[2],
-                "Получить Coin",
-                KeyCode.U,
-                hint: "Нажмите U"
-            )
+                new SSGroupHeader("Scp-261 Event Настройки"),
+
+            
+                new SSKeybindSetting(KeybindId[3],"Получить Coin", KeyCode.I, hint: "При нажатии выдает монетку, если вы эвентовый автомат")
 
             };
 
@@ -69,7 +59,7 @@ namespace AllOfPlugins_SCP_Verluer.Core
 
             if (setting.SettingId == KeybindId[1])
             {
-                GamePatch.ScpProximityVoice.HandleKey(
+                GamePatch.Scp.ScpProximityVoice.HandleKey(
                     sender,
                     keybind.SyncIsPressed);
 
@@ -79,11 +69,29 @@ namespace AllOfPlugins_SCP_Verluer.Core
             {
                 if (keybind.SyncIsPressed)
                 {
+                    if (ScpHoodActive)
+                    {
+                        HUD.HideScpHood(sender);
+                        ScpHoodActive = false;
+                    }
+                    else
+                    {
+                        HUD.ScpHpHood();
+                        ScpHoodActive = true;
+                    }
+                }
+                return;
+            }
+            if (setting.SettingId == KeybindId[3])
+            {
+                if (keybind.SyncIsPressed)
+                {
                     GamePatch.GiveSpawnItem.GiveCoin(sender);
                 }
 
                 return;
             }
+
         }
     }
 }

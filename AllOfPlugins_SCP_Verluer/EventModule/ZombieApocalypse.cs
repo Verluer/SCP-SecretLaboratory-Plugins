@@ -1,4 +1,5 @@
 ﻿using AllOfPlugins_SCP_Verluer.Core;
+using AllOfPlugins_SCP_Verluer.CustomModule.Role;
 using CentralAuth;
 using CustomPlayerEffects;
 using LabApi.Events.Handlers;
@@ -8,11 +9,14 @@ using PlayerRoles;
 using PlayerRoles.PlayableScps.HumeShield;
 using PlayerStatsSystem;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace AllOfPlugins_SCP_Verluer.EventModule
 {
+
     public class ZombieApocalypse
     {
+        public static Vector3 ZombiePosition;
         public static void Enable()
         {
             LabApi.Features.Console.Logger.Info("ZombieApocalypse START");
@@ -70,31 +74,14 @@ namespace AllOfPlugins_SCP_Verluer.EventModule
             Timing.CallDelayed(55f, () =>
             {
                 Player.Get(ZombiePlayer).SendBroadcast("Последние силы покидают вас. <color=red>Чума</color> поглощает ваше тело...", 5);
+                ZombiePosition = Player.Get(ZombiePlayer).Position; 
                 Player.Get(ZombiePlayer).Kill();
             });
             Timing.CallDelayed(60f, () =>
             {
-                HealthStat health = ZombiePlayer.playerStats.GetModule<HealthStat>();
-                MovementBoost boost = ZombiePlayer.playerEffectsController.GetEffect<MovementBoost>();
+                SCP049_2_Alpha.SpawnScp0492Alpha(ZombiePlayer, ZombiePosition);
 
-                ZombiePlayer.roleManager.ServerSetRole(RoleTypeId.Scp0492, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.None);
-                LabApi.Features.Console.Logger.Info($"Zombie: {ZombiePlayer.nicknameSync.MyNick}");
-                if (ZombiePlayer.roleManager.CurrentRole is IHumeShieldedRole shieldedRole)
-                {
-                    LabApi.Features.Console.Logger.Info($"Test: {ZombiePlayer.nicknameSync.MyNick}");
-                    var shield = shieldedRole.HumeShieldModule;
-
-                    if (shield != null)
-                        shield.HsCurrent = 1000f;
-                }
-                health.MaxValue = 2000f;
-                health.CurValue = 1500f;
-                boost.Intensity = 35;
-
-                Player.Get(ZombiePlayer).SendBroadcast(
-                    $"Ваше тело поглотила <color=red>чума</color>. Как нулевой пациент вы распространяете <color=red>Чуму</color> при поедании других существ",
-                    15
-                );
+                Player.Get(ZombiePlayer).SendBroadcast($"Ваше тело поглотила <color=red>чума</color>. Как нулевой пациент вы распространяете <color=red>Чуму</color> при поедании других существ",15);
             });
         }
     }

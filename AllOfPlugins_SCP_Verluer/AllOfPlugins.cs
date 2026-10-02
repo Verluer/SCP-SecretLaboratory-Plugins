@@ -5,7 +5,9 @@ using HarmonyLib;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.CustomHandlers;
 using LabApi.Events.Handlers;
+using LabApi.Features.Wrappers;
 using MEC;
+using PlayerRoles;
 using PlayerRoles.RoleAssign;
 using System;
 using UnityEngine;
@@ -15,102 +17,45 @@ namespace AllOfPlugins_SCP_Verluer
 {
     public class AllOfPlugins : LabApi.Loader.Features.Plugins.Plugin
     {
-        public override string Name
-        {
-            get { return "All Of Plugins"; }
-        }
-
-        public override string Description
-        {
-            get
-            {
-                return "Catalog of plugins and patches.";
-            }
-        }
-
-        public override string Author
-        {
-            get { return "Verluer"; }
-        }
-
-        public override Version RequiredApiVersion
-        {
-            get { return new Version(1, 1, 7); }
-        }
-
         private Harmony _harmony;
-        private Core.MyKeybind _myKeybind;
-        public static float _roundStartTime;
+        private MyKeybind _myKeybind;
+
+        public override string Name => "All Of Plugins";
+        public override string Description => "Catalog of plugins and patches.";
+        public override string Author => "Verluer";
+        public override Version RequiredApiVersion => new Version(1, 1, 7);
+
         public override void Enable()
         {
             _harmony = new Harmony("verluer.allofplugins");
 
-            EventModule.EventModule.Enable(_harmony);
-
-            PlayerEvents.SpawningRagdoll += OnSpawningRagdoll;
-
+            EventModule.EventModule.Enable();
             GamePatch.GamePatch.Enable(_harmony);
             PluginsPatch.PluginsPatch.Enable(_harmony);
             CandyExpansion.CandyExpansion.Enable(_harmony);
-
             CustomModule.CustomModule.Enable(_harmony);
 
             DoorManager.DoorManager.Enable();
-    
-            _myKeybind = new Core.MyKeybind();
 
+            _myKeybind = new MyKeybind();
             CustomHandlersManager.RegisterEventsHandler(_myKeybind);
-
-            RoleAssigner.OnPlayersSpawned += OnPlayersSpawned;
         }
 
         public override void Disable()
         {
-            GamePatch.GamePatch.Disable();
-            EventModule.EventModule.Disable();
-            CustomModule.CustomModule.Disable();
-            DoorManager.DoorManager.Disable();
-            PluginsPatch.PluginsPatch.Disable();
-            CandyExpansion.CandyExpansion.Disable();
-
-            PlayerEvents.SpawningRagdoll -= OnSpawningRagdoll;
-
-            if (_harmony != null)
-            {
-                _harmony.UnpatchAll("verluer.allofplugins");
-                _harmony = null;
-            }
-
-            _myKeybind?.Dispose();
-
             CustomHandlersManager.UnregisterEventsHandler(_myKeybind);
-            RoleAssigner.OnPlayersSpawned -= OnPlayersSpawned;
-
+            _myKeybind?.Dispose();
             _myKeybind = null;
 
+            DoorManager.DoorManager.Disable();
+            CustomModule.CustomModule.Disable();
+            CandyExpansion.CandyExpansion.Disable();
+            PluginsPatch.PluginsPatch.Disable();
+            GamePatch.GamePatch.Disable();
+            EventModule.EventModule.Disable();
 
-        }
-        private static void OnPlayersSpawned()
-        {
-            _roundStartTime = Time.time;
-            HUD.AllPlayerHud();
-        }
-        private static void OnSpawningRagdoll(PlayerSpawningRagdollEventArgs ev)
-        {
-            if (!Core.PlayerSchematicManager.HasSchematic(ev.Player))
-                return;
-
-            ev.IsAllowed = false;
-
-            Core.PlayerSchematicManager.DetachAsCorpse(ev.Player);
-
-            Timing.CallDelayed(0.1f, () =>
-            {
-                if (ev.Player == null)
-                    return;
-
-                Core.PlayerSchematicManager.ShowFor(ev.Player);
-            });
+            _harmony?.UnpatchAll("verluer.allofplugins");
+            _harmony = null;
         }
     }
 }

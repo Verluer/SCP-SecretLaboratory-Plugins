@@ -9,6 +9,7 @@ using MEC;
 using Respawning;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace AllOfPlugins_SCP_Verluer.DoorManager
 {
@@ -32,7 +33,7 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
             WarheadEvents.Stopped += OnWarheadStopped;
             ServerEvents.RoundEnded += OnRoundEnded;
 
-            Logger.Info("[WarheadDoorController] Enabled.");
+            LabApi.Features.Console.Logger.Info("[WarheadDoorController] Enabled.");
         }
 
         public static void Disable()
@@ -45,7 +46,7 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
 
             WarheadFirstActive = false;
 
-            Logger.Info("[WarheadDoorController] Disabled.");
+            LabApi.Features.Console.Logger.Info("[WarheadDoorController] Disabled.");
         }
 
         private static void OnWarheadStarted(WarheadStartedEventArgs ev)
@@ -89,6 +90,13 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
             {
                 Timing.CallDelayed(10f, () =>
                 {
+                    WarheadFirstActive = true;
+
+                    if (!AlphaWarheadController.InProgress)
+                    {
+                        return;
+                    }
+
                     SetAlphaProtocolDoorsLock(true);
 
                     if (_doorTracker.IsRunning)
@@ -96,7 +104,7 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
 
                     _doorTracker = Timing.RunCoroutine(TrackDoors(AlphaProtocolDoors));
 
-                    WarheadFirstActive = true;
+
                 });
                 if (DoorManager._doorSurfaceTracker.IsRunning)
                 {
@@ -107,6 +115,10 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
             }
             else if (WarheadFirstActive)
             {
+                if (!AlphaWarheadController.InProgress)
+                {
+                    return;
+                }
                 Timing.CallDelayed(5f, () =>
                 {
                     SetAlphaProtocolDoorsLock(true);
@@ -152,27 +164,29 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
 
             DoorManager._doorSurfaceTracker = Timing.RunCoroutine(WarheadDoorController.TrackDoors(DoorManager.DoorRoundStart));
 
+
             if (_doorTracker.IsRunning)
             {
                 Timing.KillCoroutines(_doorTracker);
                 _doorTracker = default;
             }
             SetAlphaProtocolDoorsLock(false);
+
         }
         private static string DeathEnd()
         {
             if (DeathEndProtocolDoors.Length == 0)
             {
-                Logger.Warn(
+                LabApi.Features.Console.Logger.Warn(
                     "[WarheadDoorController] DeathEndProtocolDoors пуст.");
 
                 return null;
             }
 
-            int index = new Random().Next(DeathEndProtocolDoors.Length);
+            int index = new System.Random().Next(DeathEndProtocolDoors.Length);
             string selectedDoorName = DeathEndProtocolDoors[index];
 
-            Logger.Info(
+            LabApi.Features.Console.Logger.Info(
                 $"[WarheadDoorController] DeathEnd выбрал дверь: {selectedDoorName}");
 
             foreach (DoorVariant door in DoorVariant.AllDoors)
@@ -184,7 +198,7 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
                     continue;
 
 
-                Logger.Info(
+                LabApi.Features.Console.Logger.Info(
                     $"[WarheadDoorController] DeathEnd закрывает дверь: {door.DoorName}");
 
                 door.NetworkTargetState = false;
@@ -193,7 +207,7 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
                     DoorLockReason.SpecialDoorFeature,
                     true);
 
-                Logger.Info(
+                LabApi.Features.Console.Logger.Info(
                     $"[WarheadDoorController] DeathEnd заблокировал дверь: {door.DoorName}");
 
                 break;
@@ -242,7 +256,7 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
 
                     if (door.NetworkTargetState)
                     {
-                        Logger.Warn(
+                        LabApi.Features.Console.Logger.Warn(
                             $"[WarheadDoorController] Дверь {door.DoorName} была открыта. " +
                             "Принудительно закрываем.");
 

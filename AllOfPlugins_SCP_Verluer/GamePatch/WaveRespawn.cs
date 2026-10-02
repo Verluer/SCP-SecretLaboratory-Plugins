@@ -173,12 +173,27 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
                 int roll = UnityEngine.Random.Range(0, countGuard.Count);
                 ReferenceHub selected = countGuard[roll];
 
+                countGuard.Remove(selected);
                 Player.Get(selected).ClearInventory();
 
                 selected.roleManager.ServerSetRole(RoleTypeId.ClassD, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.AssignInventory | RoleSpawnFlags.UseSpawnpoint);
 
                 RemoveFromAllTeams(selected);
                 ChaosTeam.Add(selected);
+            }
+            if(countGuard.Count >= 4 && (countPlayer.Count == 13 || countPlayer.Count == 14))
+            {
+                int roll = UnityEngine.Random.Range(0, countGuard.Count);
+                ReferenceHub selected = countGuard[roll];
+
+                countGuard.Remove(selected);
+
+                Player.Get(selected).ClearInventory();
+
+                selected.roleManager.ServerSetRole(RoleTypeId.Scientist, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.AssignInventory | RoleSpawnFlags.UseSpawnpoint);
+
+                RemoveFromAllTeams(selected);
+                NTFTeam.Add(selected);
             }
         }
         private static void TeamSpawn()

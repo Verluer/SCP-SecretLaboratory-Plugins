@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using AllOfPlugins_SCP_Verluer.CustomModule.Role;
+using HarmonyLib;
 using InventorySystem;
 using InventorySystem.Items.Usables.Scp330;
 using LabApi.Features.Wrappers;
@@ -27,6 +28,32 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
         }
         private static bool ServerApplyEffectsPrefix(ReferenceHub hub)
         {
+            if (HumanSCP.HumanScpPlayers.Contains(Player.Get(hub)))
+            {
+                HealthStat health = hub.playerStats.GetModule<HealthStat>();
+                AhpStat ahp = hub.playerStats.GetModule<AhpStat>();
+
+                int maxHealth = (int)health.MaxValue;
+                int currentHealth = (int)health.CurValue;
+
+                int currentAhp = (int)ahp.CurValue;
+
+                hub.roleManager.ServerSetRole(RoleTypeId.ClassD, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.None);
+                Test.ApplyTestRole(hub, currentHealth, maxHealth, currentAhp);
+
+                Timing.CallDelayed(0.1f, () => 
+                { 
+                    Player.Get(hub).AddItem(ItemType.MicroHID);
+                    Player.Get(hub).AddItem(ItemType.SCP268);
+                    Player.Get(hub).AddItem(ItemType.SCP1344);
+                    Player.Get(hub).AddItem(ItemType.KeycardO5);
+                    Player.Get(hub).AddItem(ItemType.GunLogicer);
+                    Player.Get(hub).AddItem(ItemType.ArmorHeavy);
+                    Player.Get(hub).AddAmmo(ItemType.Ammo762x39, 180);
+                });
+
+                return false;
+            }
             List<ReferenceHub> SCPlist = new List<ReferenceHub>();
             foreach (ReferenceHub SCPhub in ReferenceHub.AllHubs)
             {
@@ -58,7 +85,11 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
                 RoleTypeId HumanRole = hub.GetRoleId();
                 RoleTypeId SCPRole = SCPlist[roll].GetRoleId();
 
-                hub.roleManager.ServerSetRole(SCPRole, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.None);
+                if (SCPRole == RoleTypeId.ClassD)
+                    HumanSCP.SpawnHumanScpFromExistingScp(hub);
+                else
+                    hub.roleManager.ServerSetRole(SCPRole, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.None);
+
                 SCPlist[roll].roleManager.ServerSetRole(HumanRole, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.AssignInventory);
 
                 Timing.CallDelayed(10f, () =>

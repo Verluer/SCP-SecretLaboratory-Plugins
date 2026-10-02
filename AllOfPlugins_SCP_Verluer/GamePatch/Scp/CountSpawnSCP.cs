@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 
-namespace AllOfPlugins_SCP_Verluer.GamePatch
+namespace AllOfPlugins_SCP_Verluer.GamePatch.Scp
 {
     public class CountSpawnSCP
     {

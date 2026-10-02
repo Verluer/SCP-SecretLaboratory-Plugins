@@ -19,7 +19,7 @@ namespace AllOfPlugins_SCP_Verluer.Features
                 return;
             }
 
-            if (Time.time - AllOfPlugins._roundStartTime > 45f)
+            if (Time.time - EventModule.VanillaEventHandler.RoundStartTime > 45f)
             {
                 Player.Get(sender).SendHint(
                    "Нельзя обменяться спустя 45 секунд после начала раунда",

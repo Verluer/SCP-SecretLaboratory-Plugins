@@ -48,6 +48,8 @@ namespace AllOfPlugins_SCP_Verluer.EventModule
                     EventPlayerList.Add(hub);
                 }         
             }
+            if (EventPlayerList.Count == 0)
+                return;
 
             LabApi.Features.Console.Logger.Info(
                 $"Candidates: {EventPlayerList.Count}"

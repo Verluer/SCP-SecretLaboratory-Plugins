@@ -2,8 +2,6 @@
 using HarmonyLib;
 using InventorySystem.Items.Usables.Scp330;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Xml.Linq;
 using UnityEngine;
 
 namespace AllOfPlugins_SCP_Verluer.CandyExpansion

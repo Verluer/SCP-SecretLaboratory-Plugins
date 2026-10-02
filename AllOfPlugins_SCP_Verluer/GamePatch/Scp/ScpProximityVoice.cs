@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using VoiceChat;
 using VoiceChat.Networking;
 
-namespace AllOfPlugins_SCP_Verluer.GamePatch
+namespace AllOfPlugins_SCP_Verluer.GamePatch.Scp
 {
     public static class ScpProximityVoice
     {

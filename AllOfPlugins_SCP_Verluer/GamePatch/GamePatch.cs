@@ -9,18 +9,20 @@ namespace AllOfPlugins_SCP_Verluer.GamePatch
         public static void Enable(Harmony harmony)
         {
             GiveSpawnItem.Enable();
-            ScpProximityVoice.Enable();
-            Scp049_2Punishment.Enable(harmony);
+            Scp.ScpProximityVoice.Enable();
+            Scp.Scp049_2Punishment.Enable(harmony);
             WaveRespawn.Enable(harmony);
-            CountSpawnSCP.Enable(harmony);
+            Scp.CountSpawnSCP.Enable(harmony);
+            Warhead.Enable(harmony);
         }
         public static void Disable()
         {
             GiveSpawnItem.Disable();
-            ScpProximityVoice.Disable();
-            Scp049_2Punishment.Disable();
+            Scp.ScpProximityVoice.Disable();
+            Scp.Scp049_2Punishment.Disable();
             WaveRespawn.Disable();
-            CountSpawnSCP.Disable();
+            Scp.CountSpawnSCP.Disable();
+            Warhead.Disable();
         }
     }
 }

@@ -1,9 +1,6 @@
 ﻿using AllOfPlugins_SCP_Verluer.CustomModule.Role;
 using CentralAuth;
-using Christmas.Scp2536.Gifts;
-using CustomPlayerEffects;
 using HarmonyLib;
-using InventorySystem.Items.MicroHID.Modules;
 using InventorySystem.Items.Usables.Scp330;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Handlers;
@@ -11,20 +8,10 @@ using LabApi.Features.Wrappers;
 using MEC;
 using PlayerRoles;
 using PlayerRoles.PlayableScps.HumeShield;
-using PlayerRoles.PlayableScps.Scp049.Zombies;
-using PlayerRoles.PlayableScps.Scp3114;
-using PlayerRoles.Ragdolls;
 using PlayerStatsSystem;
-using Respawning.Objectives;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using UncomplicatedCustomRoles.API.Enums;
-using UncomplicatedCustomRoles.API.Features;
-using UncomplicatedCustomRoles.API.Features.Behaviour;
-using UncomplicatedCustomRoles.API.Interfaces;
-using UncomplicatedCustomRoles.Extensions;
-using UncomplicatedCustomRoles.Manager;
 
 namespace AllOfPlugins_SCP_Verluer.CandyExpansion
 {
@@ -46,7 +33,7 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
         };
         private static string[] ScpRoles =
         {
-            "Scp0492",
+            "Scp0492Alpha",
             "Scp3114",
             "HumanScp",
         };
@@ -54,12 +41,8 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
         {
             MethodInfo method = AccessTools.Method(typeof(CandyBlack), "ServerApplyEffects");
 
-            MethodInfo methodZombie = AccessTools.Method(typeof(ZombieConsumeAbility), "ServerComplete");
 
             if (method == null) return;
-            if (methodZombie == null) return;
-
-            _harmony.Patch(methodZombie, prefix: new HarmonyMethod(typeof(BlackCandyExpansion), nameof(ServerCompletePrefix)));
 
 
             _harmony.Patch(method, prefix: new HarmonyMethod(typeof(BlackCandyExpansion), nameof(ServerApplyEffectsPrefix)));
@@ -92,31 +75,13 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
                     string playerScpRole = ScpRoles[UnityEngine.Random.Range(0, ScpRoles.Length)];
 
                     HealthStat health = hub.playerStats.GetModule<HealthStat>();
-                    MovementBoost boost = hub.playerEffectsController.GetEffect<MovementBoost>();
 
-                    if (playerScpRole == "Scp0492")
+
+                    if (playerScpRole == "Scp0492Alpha")
                     {
-                        hub.roleManager.ServerSetRole(RoleTypeId.Scp0492, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.None);
-                        if (hub.roleManager.CurrentRole is IHumeShieldedRole shieldedRole)
-                        {
-                            var shield = shieldedRole.HumeShieldModule;
-
-                            if (shield != null)
-                                shield.HsCurrent = 1000f;
-                        }
-                        health.MaxValue = 2000f;
-                        health.CurValue = 1500f;
-                        boost.Intensity = 35;
-
-                        Timing.CallDelayed(10f, () =>
-                        {
-                            Player.Get(hub).SendHint(
-                                $"Вы заразились <color=red>чумой</color>. Как нулевой пациент вы распространяете <color=red>Чуму</color> при поедании других существ",
-                                15f
-                            );
-                        });
+                        SCP049_2_Alpha.SpawnScp0492Alpha(hub);
                     }
-                    if (playerScpRole == "Scp03114")
+                    if (playerScpRole == "Scp3114")
                     {
                         hub.roleManager.ServerSetRole(RoleTypeId.Scp3114, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.None);
                         if (hub.roleManager.CurrentRole is IHumeShieldedRole shieldedRole)
@@ -133,7 +98,7 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
                     }
                     if (playerScpRole == "HumanScp")
                     {
-                        Player.Get(hub).SetCustomRole(HumanSCP._role);
+                        HumanSCP.SpawnHumanScpFromExistingScp(hub);
                     }
                     foreach (ReferenceHub _hub in ReferenceHub.AllHubs)
                     {
@@ -144,6 +109,7 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
 
                         if (player == null)
                             continue;
+
                         Timing.CallDelayed(5f, () =>
                         {
                             player.SendBroadcast("Обнаружен новый <color=red>SCP-объект</color> в комплексе", 10);
@@ -225,39 +191,7 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
                 ev.AllowPunishment = false;
             }
         }
-        private static readonly PropertyInfo CurRagdollProperty =
-    typeof(ZombieConsumeAbility)
-        .BaseType
-        .GetProperty(
-            "CurRagdoll",
-            BindingFlags.Instance |
-            BindingFlags.NonPublic);
-
-        private static bool ServerCompletePrefix(ZombieConsumeAbility __instance)
-        {
-            ReferenceHub zombie = __instance.Owner;
-            BasicRagdoll corpse = CurRagdollProperty.GetValue(__instance) as BasicRagdoll;
-
-            if (corpse == null)
-                return true;
-
-            ReferenceHub victim = corpse.Info.OwnerHub;
-
-            if (victim == null)
-                return true;
-
-
-            HealthStat health = zombie.playerStats.GetModule<HealthStat>();
-            if (health.MaxValue == 2000)
-            {
-                if (victim.roleManager.CurrentRole.RoleTypeId == RoleTypeId.Spectator)
-                {
-                    victim.roleManager.ServerSetRole(RoleTypeId.Scp0492, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.None);
-                }
-            }
-
-            return true;
-        }
+        
 
     }
 }

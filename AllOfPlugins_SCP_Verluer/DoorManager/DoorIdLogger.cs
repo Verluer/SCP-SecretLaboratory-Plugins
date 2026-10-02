@@ -6,7 +6,7 @@ using System;
 using System.Reflection;
 using UnityEngine;
 
-namespace AllOfPlugins_SCP_Verluer.DoorMnager
+namespace AllOfPlugins_SCP_Verluer.DoorManager
 {
     public static class DoorIdLogger
     {

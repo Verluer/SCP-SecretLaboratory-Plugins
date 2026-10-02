@@ -42,6 +42,7 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
 
         public static void Disable()
         {
+
         }
 
         [HarmonyPriority(Priority.First)]
@@ -50,6 +51,7 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
             int roll = UnityEngine.Random.Range(0, 100);
             if (roll < 1)
             {
+
                 ExplosionOutcome explosionOutcome = new ExplosionOutcome();
                 explosionOutcome.ServerGrant(hub);
                 Player.Get(hub).SendHint($"Вы <color=red>взорвались</color>. Вас убил <color=blue>Ferelur-Morron-Эдвард</color>", 10f);

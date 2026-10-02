@@ -49,6 +49,7 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
             GrayCandyExpansion.Enable(harmony);
             EvilCandyExpansion.Enable(harmony);
             OrangeCandyExpansion.Enable(harmony);
+            PinkCandyExpansion.Enable(harmony);
         }
 
 
@@ -66,6 +67,7 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
             GrayCandyExpansion.Disable();
             EvilCandyExpansion.Disable();
             OrangeCandyExpansion.Disable();
+            PinkCandyExpansion.Disable();
         }
 
         public static void GiveRandomCandy(Player player)
