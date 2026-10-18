@@ -22,8 +22,14 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
         }
         private static bool ServerApplyEffectsPrefix(ReferenceHub hub)
         {
-            ApplyBrownCandyEffect(hub);
-            return false;
+            int rollHw = UnityEngine.Random.Range(0, 100);
+            if (rollHw < 19)
+            {
+                ApplyBrownCandyEffect(hub);
+                return false;
+            }
+            else
+                return true;
         }
         public static void ApplyBrownCandyEffect(ReferenceHub hub)
         {

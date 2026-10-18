@@ -163,7 +163,7 @@ namespace AllOfPlugins_SCP_Verluer.CustomModule.Role
         public override int Id { get; set; }
 
         public override string Name { get; set; } =
-            "<color=#FF96DE>Стреляй на поражение</color>";
+            "<color=#EE7600>Персонал Класса D</color>";
 
         public override bool OverrideRoleName { get; set; } = true;
 

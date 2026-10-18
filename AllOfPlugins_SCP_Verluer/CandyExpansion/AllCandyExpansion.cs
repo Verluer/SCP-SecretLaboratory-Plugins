@@ -3,6 +3,7 @@ using InventorySystem.Items.Usables.Scp330;
 using LabApi.Features.Wrappers;
 using System;
 using System.Reflection;
+using Utils;
 
 namespace AllOfPlugins_SCP_Verluer.CandyExpansion
 {
@@ -22,6 +23,13 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
 
                 typeof(CandyBlack),
                 typeof(CandyPink),
+
+                typeof(HauntedCandyRainbow),
+                typeof(HauntedCandyYellow),
+                typeof(HauntedCandyPurple),
+                typeof(HauntedCandyBlue),
+                typeof(HauntedCandyGreen),
+                typeof(HauntedCandyRed),
 
                 typeof(HauntedCandyOrange),
                 typeof(HauntedCandyGray),
@@ -52,8 +60,7 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
             if (roll < 1)
             {
 
-                ExplosionOutcome explosionOutcome = new ExplosionOutcome();
-                explosionOutcome.ServerGrant(hub);
+                ExplosionUtils.ServerExplode(hub, ExplosionType.PinkCandy);
                 Player.Get(hub).SendHint($"Вы <color=red>взорвались</color>. Вас убил <color=blue>Ferelur-Morron-Эдвард</color>", 10f);
             }
             return true;

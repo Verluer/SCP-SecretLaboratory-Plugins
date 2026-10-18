@@ -262,7 +262,7 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
             }
             int blockedRequired = GetRequiredZombieCount(0.60f);
 
-            if (zombieCount >= easyRequired)
+            if (zombieCount >= blockedRequired)
             {
                 if (IsDoorInArray(
                     UnBlocked_Medium_Door_Name, doorName))

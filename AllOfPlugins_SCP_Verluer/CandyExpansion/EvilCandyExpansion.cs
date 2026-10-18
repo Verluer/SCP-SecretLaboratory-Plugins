@@ -28,6 +28,10 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
         }
         private static bool ServerApplyEffectsPrefix(ReferenceHub hub)
         {
+            int rollHw = UnityEngine.Random.Range(0, 100);
+            if (rollHw < 19)
+            {
+
             if (HumanSCP.HumanScpPlayers.Contains(Player.Get(hub)))
             {
                 HealthStat health = hub.playerStats.GetModule<HealthStat>();
@@ -84,6 +88,7 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
                 hub.inventory.ServerDropEverything();
                 RoleTypeId HumanRole = hub.GetRoleId();
                 RoleTypeId SCPRole = SCPlist[roll].GetRoleId();
+                var oldPosition = hub.GetPosition();
 
                 if (SCPRole == RoleTypeId.ClassD)
                     HumanSCP.SpawnHumanScpFromExistingScp(hub);
@@ -92,6 +97,10 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
 
                 SCPlist[roll].roleManager.ServerSetRole(HumanRole, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.AssignInventory);
 
+                if (SCPRole == RoleTypeId.Scp079)
+                {
+                    Player.Get(SCPlist[roll]).Position = oldPosition;
+                }
                 Timing.CallDelayed(10f, () =>
                 {
                     Player.Get(hub).SendHint(
@@ -107,6 +116,9 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
 
             }
             return false;
+            }
+            else
+                return true;
         }
     }
 }

@@ -143,12 +143,12 @@ namespace AllOfPlugins_SCP_Verluer.CandyExpansion
             }
             public static readonly ICandy[] NewCandies = new ICandy[]
             {
-                new CandyGreen(),
-                new CandyPurple(),
-                new CandyRainbow(),
-                new CandyRed(),
-                new CandyYellow(),
-                new CandyBlue(),
+                new HauntedCandyGreen(),
+                new HauntedCandyPurple(),
+                new HauntedCandyRainbow(),
+                new HauntedCandyRed(),
+                new HauntedCandyYellow(),
+                new HauntedCandyBlue(),
                 new CandyPink(),
                 new CandyBlack(),
                 new HauntedCandyBrown(),

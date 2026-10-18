@@ -54,9 +54,8 @@ namespace AllOfPlugins_SCP_Verluer.Core
 
                     foreach (ReferenceHub hub in ReferenceHub.AllHubs)
                     {
-                        if (hub == null ||
-                            hub.Mode == ClientInstanceMode.DedicatedServer ||
-                            hub.roleManager.CurrentRole.Team != PlayerRoles.Team.SCPs)
+                        if (hub == null || hub.Mode == ClientInstanceMode.DedicatedServer
+                            || (hub.roleManager.CurrentRole.Team != PlayerRoles.Team.SCPs && hub.roleManager.CurrentRole.Team != PlayerRoles.Team.Flamingos))
                             continue;
 
                         Player player = Player.Get(hub);

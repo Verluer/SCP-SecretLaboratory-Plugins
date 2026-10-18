@@ -139,20 +139,18 @@ namespace AllOfPlugins_SCP_Verluer.DoorManager
         }
         private static void OnRoundEnded(RoundEndedEventArgs ev)
         {
-            if (AlphaWarheadController.Singleton.Info.ScenarioType == WarheadScenarioType.DeadmanSwitch)
-                return;
-
             if (DoorManager._doorSurfaceTracker.IsRunning)
                 Timing.KillCoroutines(DoorManager._doorSurfaceTracker);
 
             DoorManager._doorSurfaceTracker = Timing.RunCoroutine(WarheadDoorController.TrackDoors(DoorManager.DoorRoundStart));
-
+           
             if (_doorTracker.IsRunning)
             {
                 Timing.KillCoroutines(_doorTracker);
                 _doorTracker = default;
             }
             SetAlphaProtocolDoorsLock(false);
+
         }
         private static void OnWarheadStopped(WarheadStoppedEventArgs ev)
         {

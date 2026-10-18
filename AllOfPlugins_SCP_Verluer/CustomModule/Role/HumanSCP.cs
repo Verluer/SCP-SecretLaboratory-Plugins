@@ -13,6 +13,7 @@ using UncomplicatedCustomRoles.API.Features;
 using UncomplicatedCustomRoles.API.Features.Behaviour;
 using UncomplicatedCustomRoles.Extensions;
 using UncomplicatedCustomRoles.Manager;
+using UnityEngine;
 
 namespace AllOfPlugins_SCP_Verluer.CustomModule.Role
 {
@@ -98,7 +99,9 @@ namespace AllOfPlugins_SCP_Verluer.CustomModule.Role
             {
                 Manualhub.inventory.ServerDropEverything();
                 target = Player.Get(Manualhub);
+                Vector3 oldPosition = target.Position;
                 target.SetCustomRole(_role);
+                target.Position = oldPosition;
             }
 
             LabApi.Features.Console.Logger.Info(
@@ -272,7 +275,7 @@ namespace AllOfPlugins_SCP_Verluer.CustomModule.Role
                 CanReplaceRoles = new List<RoleTypeId>(),
                 MaxPlayers = 0,
                 MinPlayers = 0,
-                Spawn = SpawnType.KeepCurrentPositionSpawn,
+                Spawn = SpawnType.ClassDCell,
                 SpawnChance = 0f,
                 SpawnPoints = new List<string>(),
                 SpawnRoles = new List<RoleTypeId>(),
